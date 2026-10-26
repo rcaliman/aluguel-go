@@ -1,0 +1,6 @@
+{{define "list"}}
+{{if eq .Key "tenants"}}{{template "tenant-list" .}}
+{{else if eq .Key "landlords"}}{{template "landlord-list" .}}
+{{else if eq .Key "properties"}}{{template "property-list" .}}
+{{else if eq .Key "users"}}{{template "user-list" .}}{{end}}
+{{end}}

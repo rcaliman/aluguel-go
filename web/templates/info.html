@@ -1,0 +1,181 @@
+{{define "info"}}{{$model := uiModel .}}
+<section>
+<div class="container">
+<div class="page-header">
+<div class="d-flex justify-content-between align-items-center flex-wrap">
+<div>
+<h1 class="h3 mb-1">
+<i class="bi bi-info-circle-fill me-2"></i> Detalhes do Imóvel
+              </h1>
+<p class="mb-0 opacity-75">{{uiText (uiAdd "Informações completas do imóvel " (uiField (index $model "property") "number"))}}</p>
+</div>
+<a href="javascript:history.back()" class="btn btn-secondary">
+<i class="bi bi-arrow-left-circle"></i> Voltar
+            </a>
+</div>
+</div>
+<div class="row">
+<div class="col-lg-7">
+<div class="card-custom mb-4" style="background-color: white">
+<div class="card-custom-header d-flex justify-content-between align-items-center">
+<span>
+<i class="bi bi-house-fill me-2"></i> Informações do Imóvel
+                </span>
+{{if (canWrite $.User)}}<a class="btn btn-secondary" title="Editar" href="/properties/edit/{{uiText (uiField (index $model "property") "id")}}">
+<i class="bi bi-pencil-square"></i>
+</a>{{end}}
+</div>
+<div class="card-custom-body" style="background-color: white">
+<div class="row g-3">
+<div class="col-md-6">
+<p class="fw-bold">{{uiText (uiAdd (uiAdd (uiUpper (uiField (uiField (index $model "property") "propertyType") "displayName")) " ") (uiField (index $model "property") "number"))}}</p>
+</div>
+<div class="col-md-6">
+<label class="form-label">Tipo de Uso:</label>
+<p class="fw-normal">{{uiText (uiField (uiField (index $model "property") "useType") "displayName")}}</p>
+</div>
+<div class="col-12">
+<label class="form-label">Endereço:</label>
+<p class="fw-normal">{{uiText (uiAdd (uiAdd (uiAdd (uiAdd (uiAdd (uiAdd (uiField (index $model "property") "address") " - ") (uiField (index $model "property") "location")) ", ") (uiField (index $model "property") "city")) " - ") (uiField (index $model "property") "state"))}}</p>
+</div>
+<div class="col-md-6">
+<label class="form-label">Complemento:</label>
+<p class="fw-normal">{{uiText (uiCoalesce (uiField (index $model "property") "complement") "N/A")}}</p>
+</div>
+<div class="col-md-6">
+<label class="form-label">Dia do Pagamento:</label>
+<p class="fw-normal">{{uiText (uiField (index $model "property") "paymentDay")}}</p>
+</div>
+<div class="col-12">
+<label class="form-label">Valor do Aluguel:</label>
+<h4 class="text-ctp-green fw-normal">{{uiText (uiMoney (uiField (index $model "property") "value"))}}</h4>
+</div>
+{{if (uiDifferent (index $model "rentalCorrection") nil)}}<div class="col-12">
+<div class="p-3 mb-0 rounded" style="background-color: #eef0f4">
+<h6 class="mb-2">
+<h5>Estimativa de reajuste</h5>
+<i class="bi bi-graph-up-arrow me-2"></i>Correção pelo
+                        IPCA
+                      </h6>
+<div class="row g-2">
+<div class="col-md-6">
+<small class="text-muted d-block">Valor Original:</small>
+<strong>{{uiText (uiMoney (uiField (index $model "rentalCorrection") "originalValue"))}}</strong>
+<small class="text-muted ms-1">{{uiText (uiAdd "em " (uiDate (uiField (index $model "rentalCorrection") "originalDate") "dd/MM/yyyy"))}}</small>
+<div class="mt-1">
+{{$period := uiAge (uiField (index $model "rentalCorrection") "originalDate")}}<small class="text-muted fst-italic">{{uiText (uiAdd (uiChoose (uiGreater (uiField $period "years") 0) (uiAdd (uiAdd (uiField $period "years") (uiChoose (uiEqual (uiField $period "years") 1) " ano" " anos")) (uiChoose (uiGreater (uiField $period "months") 0) (uiAdd (uiAdd " e " (uiField $period "months")) (uiChoose (uiEqual (uiField $period "months") 1) " mês" " meses")) "")) (uiChoose (uiGreater (uiField $period "months") 0) (uiAdd (uiField $period "months") (uiChoose (uiEqual (uiField $period "months") 1) " mês" " meses")) "menos de 1 mês")) " atrás")}}</small>
+</div>
+</div>
+<div class="col-md-6">
+<small class="text-muted d-block">Valor Corrigido:</small>
+<strong class="text-ctp-lavender">{{uiText (uiMoney (uiField (index $model "rentalCorrection") "correctedValue"))}}</strong>
+<small class="text-muted ms-1">{{uiText "hoje"}}</small>
+</div>
+<div class="col-12 mt-2">
+<small class="text-muted d-block">IPCA Acumulado:</small>
+<strong>{{uiText (uiAdd (uiDecimal (uiField (index $model "rentalCorrection") "accumulatedIpcaPercentage") 1 2) "%")}}</strong>
+</div>
+<div class="col-12 mt-2">
+<small class="text-muted d-block">Diferença:</small>
+<strong class="text-ctp-maroon">{{uiText (uiMoney (uiSub (uiField (index $model "rentalCorrection") "correctedValue") (uiField (index $model "rentalCorrection") "originalValue")))}}</strong>
+</div>
+</div>
+</div>
+</div>{{end}}
+{{if (uiField (index $model "property") "observation")}}<div class="col-12">
+<label class="form-label">Observação:</label>
+<p class="fw-normal fst-italic">{{uiText (uiField (index $model "property") "observation")}}</p>
+</div>{{end}}
+</div>
+</div>
+</div>
+<div class="card-custom mb-4" style="background-color: white">
+<div class="card-custom-header d-flex justify-content-between align-items-center">
+<span>
+<i class="bi bi-person-badge-fill me-2"></i> Dados do
+                  Inquilino
+                </span>
+{{if (canWrite $.User)}}{{if (index $model "tenant")}}<a class="btn btn-secondary" title="Editar" href="/tenants/edit/{{uiText (uiField (index $model "tenant") "id")}}">
+<i class="bi bi-pencil-square"></i>
+</a>{{end}}{{end}}
+</div>
+<div class="card-custom-body" style="background-color: white">
+{{if (index $model "tenant")}}<div>
+<div class="row g-3">
+<div class="col-12">
+<label class="form-label">Nome Completo:</label>
+<p class="fw-normal">{{uiText (uiField (index $model "tenant") "name")}}</p>
+</div>
+<div class="col-md-6">
+<label class="form-label">CPF/CNPJ:</label>
+<p class="fw-normal cpf-cnpj-display">{{uiText (uiField (index $model "tenant") "cpfCnpj")}}</p>
+</div>
+<div class="col-md-6">
+<label class="form-label">RG:</label>
+<p class="fw-normal">{{uiText (uiField (index $model "tenant") "document")}}</p>
+</div>
+<div class="col-md-6">
+<label class="form-label">Nacionalidade:</label>
+<p class="fw-normal">{{uiText (uiField (index $model "tenant") "nationality")}}</p>
+</div>
+<div class="col-md-6">
+<label class="form-label">Estado Civil:</label>
+<p class="fw-normal">{{uiText (uiCoalesce (uiField (uiField (index $model "tenant") "maritalStatus") "displayName") "Não informado")}}</p>
+</div>
+{{if (uiNot (uiEmpty (uiField (index $model "tenant") "contacts")))}}<div class="col-12">
+<label class="form-label">Contatos:</label>
+<ul class="list-group">
+{{range $index, $contact := (uiField (index $model "tenant") "contacts")}}<li class="list-group-item">
+<i class="bi {{uiText (uiChoose (uiEqual (uiField (uiField $contact "type") "name") "EMAIL") "bi-envelope-fill" "bi-phone-fill")}}"></i>
+<strong class="me-2">{{uiText (uiAdd (uiField (uiField $contact "type") "displayName") ":")}}</strong>
+<span>{{uiText (uiField $contact "contact")}}</span>
+</li>{{end}}
+</ul>
+</div>{{end}}
+</div>
+</div>{{end}}
+{{if (uiEqual (index $model "tenant") nil)}}<div class="text-center py-3">
+<i class="bi bi-person-x-fill display-5 text-muted"></i>
+<p class="mt-2 text-muted">Imóvel atualmente vago.</p>
+</div>{{end}}
+</div>
+</div>
+</div>
+<div class="col-lg-5">
+<div class="card-custom">
+<div class="card-custom-header">
+<i class="bi bi-clock-history me-2"></i> Histórico de Alterações
+              </div>
+<div class="table-responsive">
+<table class="table table-sm mb-0">
+<thead>
+<tr>
+<th>Data</th>
+<th>Inquilino</th>
+<th class="text-end">Valor R$</th>
+</tr>
+</thead>
+<tbody>
+{{range $index, $log := (index $model "propertyLog")}}<tr>
+<td>
+<small>{{uiText (uiDate (uiField $log "createdAt") "dd/MM/yyyy HH:mm")}}</small>
+</td>
+<td>
+<span>{{uiText (uiField $log "tenantName")}}</span>
+</td>
+<td class="text-end fw-bold">{{uiText (uiMoney (uiField $log "value"))}}</td>
+</tr>{{end}}
+{{if (uiEmpty (index $model "propertyLog"))}}<tr>
+<td colspan="3" class="text-center py-4 text-muted">
+                        Nenhum registro encontrado.
+                      </td>
+</tr>{{end}}
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+{{end}}

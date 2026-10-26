@@ -1,0 +1,73 @@
+{{define "header"}}{{$model := uiModel .}}
+<header>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<div class="container">
+
+<a class="navbar-brand d-flex align-items-center" href="/">
+<i class="bi bi-house-gear me-2"></i>
+<span>Aluguel</span>
+</a>
+
+<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+<span class="navbar-toggler-icon"></span>
+</button>
+
+<div class="collapse navbar-collapse" id="navbarNav">
+
+{{if (uiNot (uiEqual (index $model "currentPage") "home"))}}
+<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+{{if $.User}}<li class="nav-item">
+<a class="nav-link" href="/properties">
+<i class="bi bi-buildings me-1"></i> Imóveis
+                  </a>
+</li>{{end}}
+{{if $.User}}<li class="nav-item">
+<a class="nav-link" href="/tenants">
+<i class="bi bi-people me-1"></i> Inquilinos
+                  </a>
+</li>{{end}}
+{{if $.User}}<li class="nav-item">
+<a class="nav-link" href="/landlords">
+<i class="bi bi-person-badge me-1"></i> Locadores
+                  </a>
+</li>{{end}}
+{{if $.User}}<li class="nav-item">
+<a class="nav-link" href="/energies">
+<i class="bi bi-lightning-charge me-1"></i> Energia
+                  </a>
+</li>{{end}}
+{{if (eqs (uiField $.User "role") "ADMIN")}}<li class="nav-item">
+<a class="nav-link" href="/users">
+<i class="bi bi-person-gear me-1"></i> Usuários
+                  </a>
+</li>{{end}}
+</ul>
+{{end}}
+
+{{if (uiEqual (index $model "currentPage") "home")}}<div class="me-auto"></div>{{end}}
+
+<ul class="navbar-nav">
+
+{{if (not $.User)}}<li class="nav-item">
+<a class="nav-link" title="Entrar" href="/login">
+                  login <i class="bi bi-box-arrow-in-right" style="font-size: 1.5rem"></i>
+</a>
+</li>{{end}}
+
+{{if $.User}}<li class="nav-item d-flex align-items-center">
+<span class="text-white d-none d-lg-inline me-2" style="cursor: default">{{uiText (uiField $.User "name")}}</span>
+<a class="nav-link p-2" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Alterar senha" href="/password/form">
+<i class="bi bi-key" style="font-size: 1.3rem"></i>
+</a>
+<form method="post" class="m-0" action="/logout"><input type="hidden" name="_csrf" value="{{$.CSRF}}">
+<button type="submit" class="nav-link p-2 border-0 bg-transparent" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Fazer logoff">
+<i class="bi bi-box-arrow-right" style="font-size: 1.3rem"></i>
+</button>
+</form>
+</li>{{end}}
+</ul>
+</div>
+</div>
+</nav>
+</header>
+{{end}}

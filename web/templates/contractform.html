@@ -1,0 +1,156 @@
+{{define "contractform"}}{{$model := uiModel .}}
+<section>
+<div class="container">
+<div class="page-header">
+<div>
+<h1 class="h3 mb-1">
+<i class="bi bi-file-earmark-text-fill me-2"></i> Gerador de
+              Contrato
+            </h1>
+<p class="mb-0 opacity-75">
+              Preencha os dados para gerar o contrato de aluguel
+            </p>
+</div>
+</div>
+<div class="card-custom">
+<div class="card-custom-header">
+<i class="bi bi-pencil-square me-2"></i> Detalhes do Contrato
+          </div>
+<div class="card-custom-body">
+<form method="POST" class="contract-form" action="/contracts/editor"><input type="hidden" name="_csrf" value="{{$.CSRF}}">
+<input type="hidden" name="propertyId" value="{{uiText (uiField (index $model "property") "id")}}">
+<div class="info-box mb-4">
+<i class="bi bi-info-circle me-2" style="color: var(--ctp-maroon)"></i>
+                Os campos que têm a mesma cor da página só podem ser editados
+                pelos formulários de cadastro do imóvel ou do inquilino,
+                acessíveis pelos links acima.
+              </div>
+<h5 class="form-section-title">
+<i class="bi bi-people"></i> Partes Envolvidas
+              </h5>
+<div class="row">
+<div class="col-md-6 mb-3">
+<label for="landlord" class="form-label">Locador (Proprietário)</label>
+<select class="form-select editable-field" id="landlord" name="landlordId" required="">
+<option value="">Selecione o locador...</option>
+{{range $index, $l := (index $model "landlords")}}<option value="{{uiText (uiField $l "id")}}" {{if (uiField $l "main")}}selected{{end}}>{{uiText (uiField $l "name")}}</option>{{end}}
+</select>
+</div>
+</div>
+<h5 class="form-section-title">
+<i class="bi bi-house-door"></i> Dados do Imóvel
+              </h5>
+<div class="row">
+<div class="col-md-6 mb-3">
+<label for="propertyType" class="form-label">Tipo de Imóvel</label>
+<input type="text" class="form-control" id="propertyType" name="propertyType" readonly="" value="{{uiText (uiChoose (uiDifferent (uiField (index $model "property") "propertyType") nil) (uiField (uiField (index $model "property") "propertyType") "displayName") "")}}">
+</div>
+<div class="col-md-6 mb-3">
+<label for="useType" class="form-label">Tipo de Uso</label>
+<input type="text" class="form-control" id="useType" name="useType" readonly="" value="{{uiText (uiChoose (uiDifferent (uiField (index $model "property") "useType") nil) (uiField (uiField (index $model "property") "useType") "displayName") "")}}">
+</div>
+</div>
+<div class="row">
+<div class="col-md-9 mb-3">
+<label for="propertyAddress" class="form-label">Logradouro (Rua, Av.)</label>
+<input type="text" class="form-control" id="propertyAddress" readonly="" value="{{uiText (uiAdd (uiCoalesce (uiField (index $model "property") "address") "") (uiChoose (uiDifferent (uiField (index $model "property") "number") nil) (uiAdd ", " (uiField (index $model "property") "number")) ""))}}">
+</div>
+<div class="col-md-3 mb-3">
+<label for="propertyComplement" class="form-label">Complemento</label>
+<input type="text" class="form-control" id="propertyComplement" readonly="" value="{{uiText (uiCoalesce (uiField (index $model "property") "complement") "")}}">
+</div>
+</div>
+<div class="row">
+<div class="col-md-5 mb-3">
+<label for="propertyLocation" class="form-label">Bairro</label>
+<input type="text" class="form-control" id="propertyLocation" readonly="" value="{{uiText (uiCoalesce (uiField (index $model "property") "location") "")}}">
+</div>
+<div class="col-md-5 mb-3">
+<label for="propertyCity" class="form-label">Cidade</label>
+<input type="text" class="form-control" id="propertyCity" readonly="" value="{{uiText (uiCoalesce (uiField (index $model "property") "city") "")}}">
+</div>
+<div class="col-md-2 mb-3">
+<label for="propertyState" class="form-label">Estado</label>
+<input type="text" class="form-control" id="propertyState" readonly="" value="{{uiText (uiCoalesce (uiField (index $model "property") "state") "")}}">
+</div>
+</div>
+<div class="row">
+<div class="col-md-6 mb-3">
+<label for="propertyValue" class="form-label">Valor do Aluguel</label>
+<input type="text" class="form-control" id="propertyValue" readonly="" value="{{uiText (uiMoney (uiField (index $model "property") "value"))}}">
+</div>
+<div class="col-md-6 mb-3">
+<label for="propertyPaymentDay" class="form-label">Dia do Vencimento</label>
+<input type="text" class="form-control" id="propertyPaymentDay" readonly="" value="{{uiText (uiField (index $model "property") "paymentDay")}}">
+</div>
+</div>
+<h5 class="form-section-title">
+<i class="bi bi-person"></i> Dados do Inquilino
+              </h5>
+<div class="row">
+<div class="col-12 mb-3">
+<label for="tenantName" class="form-label">Nome do Inquilino</label>
+<input type="text" class="form-control" id="tenantName" readonly="" value="{{uiText (uiCoalesce (uiField (index $model "tenant") "name") "")}}">
+</div>
+</div>
+<div class="row">
+<div class="col-md-6 mb-3">
+<label for="tenantCpfCnpj" class="form-label">CPF/CNPJ</label>
+<input type="text" class="form-control cpf-cnpj-display" id="tenantCpfCnpj" readonly="" value="{{uiText (uiCoalesce (uiField (index $model "tenant") "cpfCnpj") "")}}">
+</div>
+<div class="col-md-6 mb-3">
+<label for="tenantDocument" class="form-label">Documento (RG)</label>
+<input type="text" class="form-control" id="tenantDocument" readonly="" value="{{uiText (uiCoalesce (uiField (index $model "tenant") "document") "")}}">
+</div>
+</div>
+<div class="row">
+<div class="col-md-6 mb-3">
+<label for="tenantMaritalStatus" class="form-label">Estado Civil</label>
+<input type="text" class="form-control" id="tenantMaritalStatus" readonly="" value="{{uiText (uiChoose (uiDifferent (uiField (index $model "tenant") "maritalStatus") nil) (uiField (uiField (index $model "tenant") "maritalStatus") "displayName") "")}}">
+</div>
+<div class="col-md-6 mb-3">
+<label for="nationality" class="form-label">Nacionalidade</label>
+<input type="text" class="form-control" id="nationality" readonly="" value="{{uiText (uiCoalesce (uiField (index $model "tenant") "nationality") "")}}">
+</div>
+</div>
+<div class="row">
+<div class="col-12 mb-3">
+<label for="tenantAddress" class="form-label">Endereço do Inquilino</label>
+<input type="text" class="form-control" id="tenantAddress" readonly="" value="{{uiText (uiAdd (uiAdd (uiAdd (uiChoose (uiDifferent (uiField (index $model "tenant") "address") nil) (uiField (index $model "tenant") "address") "") (uiChoose (uiDifferent (uiField (index $model "tenant") "location") nil) (uiAdd ", " (uiField (index $model "tenant") "location")) "")) (uiChoose (uiDifferent (uiField (index $model "tenant") "city") nil) (uiAdd " - " (uiField (index $model "tenant") "city")) "")) (uiChoose (uiDifferent (uiField (index $model "tenant") "state") nil) (uiAdd "/" (uiField (index $model "tenant") "state")) ""))}}">
+</div>
+</div>
+<h5 class="form-section-title">
+<i class="bi bi-calendar-range"></i> Período do Contrato
+              </h5>
+<div class="row">
+<div class="col-md-3 mb-3">
+<label for="startMonth" class="form-label">Mês Inicial</label>
+<select id="startMonth" name="startMonth" class="form-select editable-field"></select>
+</div>
+<div class="col-md-3 mb-3">
+<label for="startYear" class="form-label">Ano Inicial</label>
+<select id="startYear" name="startYear" class="form-select editable-field"></select>
+</div>
+<div class="col-md-3 mb-3">
+<label for="endMonth" class="form-label">Mês Final</label>
+<select id="endMonth" name="endMonth" class="form-select editable-field"></select>
+</div>
+<div class="col-md-3 mb-3">
+<label for="endYear" class="form-label">Ano Final</label>
+<select id="endYear" name="endYear" class="form-select editable-field"></select>
+</div>
+</div>
+<div class="d-flex justify-content-end gap-3 pt-4 mt-3 border-top">
+<a class="btn btn-secondary" href="/properties">
+<i class="bi bi-x-circle"></i> Cancelar
+                </a>
+<button type="submit" class="btn btn-primary">
+<i class="bi bi-file-earmark-check"></i> Gerar Contrato
+                </button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</section>
+{{end}}

@@ -1,0 +1,9 @@
+{{define "form"}}
+{{if eq .Key "tenants"}}{{template "tenant-form" .}}
+{{else if eq .Key "landlords"}}{{template "landlord-form" .}}
+{{else if eq .Key "properties"}}{{template "property-form" .}}
+{{else if eq .Key "users"}}{{template "user-form" .}}
+{{else if eq .Key "energies"}}{{template "energy-form" .}}
+{{else if eq .Key "commercial"}}{{template "commercial-form" .}}
+{{else if eq .Key "titles"}}{{template "titles-form" .}}{{end}}
+{{end}}

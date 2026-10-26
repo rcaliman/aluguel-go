@@ -1,0 +1,51 @@
+{{define "titles-form"}}{{$model := uiModel .}}
+<section>
+<div class="container">
+<div class="page-header">
+<div>
+<h1 class="h3 mb-1">
+<i class="bi bi-pencil-square me-2"></i> Editar Títulos da Tabela
+            </h1>
+<p class="mb-0 opacity-75">
+              Altere os nomes das colunas para identificar as quitinetes.
+            </p>
+</div>
+</div>
+<div class="card-custom">
+<div class="card-custom-header">
+<span><i class="bi bi-input-cursor-text me-2"></i> Títulos</span>
+</div>
+<div class="card-custom-body p-4">
+<form method="post" action="/energies/savetitle"><input type="hidden" name="_csrf" value="{{$.CSRF}}">
+<div class="mb-3">
+<label for="titleAmount1" class="form-label">Identificação da primeira quitinete</label>
+<input type="text" class="form-control" id="titleAmount1" placeholder="Ex: Quitinete 1" name="titleAmount1" value="{{uiText (uiFormValue (uiField (index $model "energyTitle") "titleAmount1"))}}">
+</div>
+<div class="mb-3">
+<label for="titleAmount2" class="form-label">Identificação da segunda quitinete</label>
+<input type="text" class="form-control" id="titleAmount2" placeholder="Ex: Quitinete 2" name="titleAmount2" value="{{uiText (uiFormValue (uiField (index $model "energyTitle") "titleAmount2"))}}">
+</div>
+<div class="mb-3">
+<label for="titleAmount3" class="form-label">Identificação da terceira quitinete</label>
+<input type="text" class="form-control" id="titleAmount3" placeholder="Ex: Quitinete 3" name="titleAmount3" value="{{uiText (uiFormValue (uiField (index $model "energyTitle") "titleAmount3"))}}">
+</div>
+<div class="mb-3">
+<label for="titleAmount4" class="form-label">Identificação do primeiro ponto</label>
+<input type="text" class="form-control" id="titleAmount4" placeholder="Ex: Ponto 1" name="titleAmount4" value="{{uiText (uiFormValue (uiField (index $model "energyTitle") "titleAmount4"))}}">
+</div>
+<div class="mb-3">
+<label for="titleAmount5" class="form-label">Identificação do segundo ponto</label>
+<input type="text" class="form-control" id="titleAmount5" placeholder="Ex: Ponto 2" name="titleAmount5" value="{{uiText (uiFormValue (uiField (index $model "energyTitle") "titleAmount5"))}}">
+</div>
+<div class="d-flex justify-content-end mt-4">
+<a class="btn btn-secondary me-2" href="/energies">Cancelar</a>
+<button type="submit" class="btn btn-primary">
+                  Salvar Títulos
+                </button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</section>
+{{end}}

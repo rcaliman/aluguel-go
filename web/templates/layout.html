@@ -1,0 +1,47 @@
+{{define "layout"}}<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Title}} - Aluguel de Imóveis</title>
+  <meta name="theme-color" content="#212529">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Aluguel">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+  <link rel="stylesheet" href="/vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="/vendor/bootstrap-icons/bootstrap-icons.css">
+  <link rel="stylesheet" href="/css/style.css">
+  {{if eq .Page "energy"}}<link rel="stylesheet" href="/css/energy-list.css">{{end}}
+  {{if eq .Page "receipts"}}<link rel="stylesheet" href="/css/receipt-list.css">{{end}}
+  {{if eq .Page "contractform"}}<link rel="stylesheet" href="/css/contract-form.css">{{end}}
+  {{if eq .Page "contract"}}<link rel="stylesheet" href="/css/contract-editor.css">{{end}}
+</head>
+<body>
+  {{template "header" .}}
+  {{if and .Error (ne .Page "login")}}<div class="container mt-3"><div class="alert alert-danger" role="alert"><i class="bi bi-exclamation-triangle-fill me-2"></i>{{.Error}}</div></div>{{end}}
+  <main role="main" class="container">
+    {{if eq .Page "home"}}{{template "home" .}}
+    {{else if eq .Page "login"}}{{template "login" .}}
+    {{else if eq .Page "form"}}{{template "form" .}}
+    {{else if eq .Page "list"}}{{template "list" .}}
+    {{else if eq .Page "energy"}}{{template "energy" .}}
+    {{else if eq .Page "password"}}{{template "password" .}}
+    {{else if eq .Page "contractform"}}{{template "contractform" .}}
+    {{else if eq .Page "info"}}{{if and .Correction (not .CorrectionData)}}<div class="alert alert-warning" role="alert">{{.Correction}}</div>{{end}}{{template "info" .}}
+    {{else if eq .Page "receipts"}}{{template "receipts" .}}
+    {{else if eq .Page "contract"}}{{template "contract" .}}
+    {{else}}{{.Body}}{{end}}
+  </main>
+  {{template "footer" .}}
+  <form id="delete-form" method="post" hidden><input type="hidden" name="_csrf" value="{{.CSRF}}"></form>
+  <script src="/vendor/jquery.min.js"></script>
+  <script src="/vendor/bootstrap.bundle.min.js"></script>
+  <script src="/vendor/jquery.mask.min.js"></script>
+  <script src="/js/script.js"></script>
+  <script src="/js/go-app.js"></script>
+  <script src="/js/pwa.js"></script>
+</body>
+</html>{{end}}

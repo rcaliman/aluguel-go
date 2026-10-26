@@ -1,0 +1,16 @@
+{
+  "address": ":8080",
+  "database": {
+    "host": "localhost",
+    "port": "3306",
+    "name": "db_aluguel",
+    "username": "substituir",
+    "password": "substituir",
+    "timezone": "America/Sao_Paulo",
+    "parameters": { "tls": "false" },
+    "max_open_connections": 10,
+    "max_idle_connections": 5
+  },
+  "secure_cookies": false,
+  "session_timeout_seconds": 1800
+}

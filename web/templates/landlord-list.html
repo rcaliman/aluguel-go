@@ -1,0 +1,100 @@
+{{define "landlord-list"}}{{$model := uiModel .}}
+<section>
+<div class="container">
+<div class="page-header">
+<div class="d-flex justify-content-between align-items-center flex-wrap">
+<div>
+<h1 class="h3 mb-1">
+<i class="bi bi-people-fill me-2"></i> Lista de Locadores
+              </h1>
+<p class="mb-0 opacity-75">
+                Gerencie os proprietários dos imóveis.
+              </p>
+</div>
+{{if (canWrite $.User)}}<a class="btn btn-secondary" href="/landlords/new">
+<i class="bi bi-plus-circle"></i> Novo Locador
+            </a>{{end}}
+</div>
+</div>
+<div class="card-custom">
+<div class="card-custom-header">
+<i class="bi bi-list-ul me-2"></i> Locadores Cadastrados
+          </div>
+<div class="table-responsive">
+<table class="table table-hover table-striped mb-0 table-sm">
+<thead>
+<tr>
+<th class="text-center th-col-main hide-on-mobile">Principal</th>
+<th>Nome</th>
+<th class="hide-on-mobile">CPF/CNPJ</th>
+<th class="hide-on-mobile">Cidade/Estado</th>
+<th>Contatos</th>
+{{if (canWrite $.User)}}<th class="text-center th-col-actions">
+                    Ações
+                  </th>{{end}}
+</tr>
+</thead>
+<tbody>
+{{range $index, $landlord := (index $model "landlords")}}<tr>
+<td class="text-center hide-on-mobile">
+{{if (uiField $landlord "main")}}<span>
+<i class="bi bi-check2-square text-ctp-lavender fs-5" title="Locador Principal"></i>
+</span>{{end}}
+</td>
+<td class="name-cell" title="{{uiText (uiField $landlord "name")}}">{{uiText (uiField $landlord "name")}}</td>
+<td class="cpf-cnpj-display hide-on-mobile">{{uiText (uiField $landlord "cpfCnpj")}}</td>
+<td class="hide-on-mobile">{{uiText (uiChoose (uiDifferent (uiField $landlord "city") nil) (uiAdd (uiAdd (uiField $landlord "city") " - ") (uiField $landlord "state")) "")}}</td>
+<td class="contact-cell">
+{{range $index, $contact := (uiField $landlord "contacts")}}{{$iterStat := uiIteration $index}}<div class="contact-item">
+<small>{{uiText (uiField $contact "contact")}}</small>
+</div>{{end}}
+</td>
+{{if (canWrite $.User)}}<td class="text-center">
+<div class="action-buttons">
+<a class="action-btn action-btn-edit" title="Editar" href="/landlords/edit/{{uiText (uiField $landlord "id")}}">
+<i class="bi bi-pencil"></i>
+</a>
+<button class="action-btn action-btn-delete" title="Excluir" type="button" data-delete="/landlords/delete/{{uiText (uiField $landlord "id")}}">
+<i class="bi bi-trash"></i>
+</button>
+</div>
+</td>{{end}}
+</tr>{{end}}
+{{if (uiEmpty (index $model "landlords"))}}<tr>
+<td colspan="8" class="text-center py-4">
+<i class="bi bi-inbox display-4 text-muted d-block mb-2"></i>
+<span class="text-muted">Nenhum locador cadastrado</span>
+</td>
+</tr>{{end}}
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<script>
+        // Adicionar links tel: para números de telefone
+        document.addEventListener("DOMContentLoaded", function () {
+          const contactItems = document.querySelectorAll(".contact-item small");
+
+          contactItems.forEach(function (item) {
+            const text = item.textContent.trim();
+            // Verifica se o texto é principalmente números (telefone)
+            // Remove espaços, parênteses, hífens e +
+            const cleanText = text.replace(/[\s\(\)\-\+]/g, "");
+
+            // Se tiver pelo menos 8 dígitos, considera como telefone
+            if (cleanText.match(/^\d{8,}$/)) {
+              const phoneNumber = cleanText;
+              const link = document.createElement("a");
+              link.href = "tel:" + phoneNumber;
+              link.textContent = text;
+              link.title = "Ligar para " + text;
+
+              item.textContent = "";
+              item.appendChild(link);
+            }
+          });
+        });
+      </script>
+</section>
+{{end}}

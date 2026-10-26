@@ -1,0 +1,182 @@
+{{define "contract"}}{{$p := .Record}}{{$t := .Extra.tenant}}{{$l := .Extra.landlord}}
+<section><div class="page-header no-print d-flex justify-content-between align-items-center">
+<div>
+<h1 class="h3 mb-1">
+<i class="bi bi-pencil-square me-2"></i> Editor de Contrato
+          </h1>
+<p class="mb-0 opacity-75">Edite o texto e imprima</p>
+</div>
+<a href="javascript:history.back()" class="btn btn-secondary">
+<i class="bi bi-arrow-left"></i> Voltar
+        </a>
+</div><div class="toolbar no-print">
+<button id="boldButton" class="btn btn-sm btn-secondary">
+<i class="bi bi-type-bold"></i> Negrito
+        </button>
+<button id="italicButton" class="btn btn-sm btn-secondary">
+<i class="bi bi-type-italic"></i> Itálico
+        </button>
+<button id="underlineButton" class="btn btn-sm btn-secondary">
+<i class="bi bi-type-underline"></i> Sublinhado
+        </button>
+<div class="ms-auto">
+<button onclick="window.print();" class="btn btn-primary">
+<i class="bi bi-printer"></i> Imprimir Contrato
+          </button>
+</div>
+</div>
+<div id="print-area"><div id="textoContrato" class="container-contrato" contenteditable="true"><div class="titulo-contrato">CONTRATO DE LOCAÇÃO DE IMÓVEL</div>
+<div class="paragrafo-contrato"><strong>LOCADOR(A): {{upper (s $l.name)}}</strong>, {{lower (s $l.nationality)}}, {{display $l.marital_status}}, portador(a) do RG nº {{if $l.document}}{{$l.document}}{{else}}[RG]{{end}} e do CPF/CNPJ nº {{doc $l.cpf_cnpj}}, residente e domiciliado na cidade de {{s $l.city}}-{{s $l.state}}, doravante denominado simplesmente <strong>LOCADOR(A)</strong>.</div>
+<div class="paragrafo-contrato"><strong>LOCATÁRIO(A): {{upper (s $t.name)}}</strong>, {{if isCompany $t.cpf_cnpj}}pessoa jurídica de direito privado, inscrita no CNPJ sob o nº {{doc $t.cpf_cnpj}}, com sede em {{s $t.address}}, {{s $t.city}}-{{s $t.state}}, neste ato representada por seu representante legal, [nome completo do representante], [nacionalidade], [estado civil], [profissão], portador(a) do RG nº [número do RG] e do CPF nº [número do CPF do representante]{{else}}{{if $t.nationality}}{{lower (s $t.nationality)}}{{else}}[nacionalidade]{{end}}, {{if $t.marital_status}}{{display $t.marital_status}}{{else}}[estado civil]{{end}}, portador(a) do RG nº {{if $t.document}}{{$t.document}}{{else}}[RG]{{end}} e do CPF nº {{if $t.cpf_cnpj}}{{doc $t.cpf_cnpj}}{{else}}[CPF]{{end}}, residente e domiciliado na cidade de {{s $t.city}}-{{s $t.state}}{{end}}, doravante denominado simplesmente <strong>LOCATÁRIO(A)</strong>.</div>
+          <div class="paragrafo-contrato">
+            Os signatários que contratam nas qualidades indicadas neste
+            instrumento têm entre si justo e contratado o presente instrumento,
+            mediante as cláusulas e condições que seguem:
+          </div>
+          <div class="clausula-contrato">
+            <span class="destacar"
+              >CLÁUSULA PRIMEIRA - DO OBJETO E PRAZO DE LOCAÇÃO:</span
+            >
+            O(A) LOCADOR(A), sendo legítimo(a) possuidor(a) do imóvel para fins
+            <span
+            >{{if eqs $p.use_type "RESIDENCIAL"}}residenciais{{else}}comerciais{{end}}</span>
+            de número <span>{{s $p.number}}</span>, localizado(a)
+            na <span>{{s $p.address}}</span>, na cidade de
+            <span>{{s $p.city}}-{{s $p.state}}</span>, o
+            dá em locação ao(à) LOCATÁRIO(A) pelo prazo de
+            <span>{{.Extra.months}}</span> meses, a contar de
+            <span>{{.Extra.start}}</span> até
+            <span>{{.Extra.stop}}</span>.
+          </div>
+          <div class="paragrafo-contrato">
+            PARÁGRAFO PRIMEIRO: O objeto da presente locação destina-se
+            exclusivamente a
+            {{if eqs $p.use_type "RESIDENCIAL"}}fins residenciais.{{else}}fins comerciais.{{end}}
+          </div>
+          <div class="paragrafo-contrato">
+            PARÁGRAFO SEGUNDO: O presente contrato poderá ser prorrogado
+            mediante acordo prévio entre as partes. Caso o(a) LOCATÁRIO(A)
+            permaneça no imóvel após o término do prazo contratual, sem oposição
+            expressa do(a) LOCADOR(A), a locação considerar-se-á prorrogada por
+            tempo indeterminado, nos termos do art. 46, §1º da Lei nº 8.245/91.
+          </div>
+          <div class="clausula-contrato">
+            <span class="destacar"
+              >CLÁUSULA SEGUNDA - DO VALOR MENSAL DO ALUGUEL:</span
+            >
+            A contraprestação pela locação do imóvel será de
+            <span>{{money $p.rental_value}}</span>
+            (<span>{{.Extra.words}}</span>), a ser paga mensalmente
+            até o dia <span>{{s $p.payment_day}}</span> de cada
+            mês, ficando a cargo do(a) LOCATÁRIO(A), além do aluguel, as
+            despesas de energia elétrica.
+          </div>
+          <div class="paragrafo-contrato">
+            PARÁGRAFO ÚNICO: O aluguel será reajustado anualmente, observada a
+            menor periodicidade permitida por lei, conforme a variação acumulada
+            do IPCA (Índice Nacional de Preços ao Consumidor Amplo) no período.
+          </div>
+          <div class="clausula-contrato">
+            <span class="destacar"
+              >CLÁUSULA TERCEIRA - DA VISTORIA E CONSERVAÇÃO DO IMÓVEL:</span
+            >
+            O(A) LOCATÁRIO(A) declara ter procedido à vistoria no imóvel locado,
+            recebendo-o em perfeito estado de conservação, obrigando-se a
+            mantê-lo no mais perfeito estado de conservação e limpeza, para
+            assim restituí-lo ao(à) LOCADOR(A) quando finda ou rescindida a
+            locação, correndo por sua exclusiva conta as despesas necessárias
+            para este fim, sem direito a qualquer ressarcimento.
+          </div>
+          <div class="paragrafo-contrato">
+            PARÁGRAFO ÚNICO: A locação somente se considerará encerrada após a
+            entrega formal das chaves ao(à) LOCADOR(A) e a realização da
+            vistoria final do imóvel, bem como a quitação integral de todos os
+            valores devidos pelo(a) LOCATÁRIO(A).
+          </div>
+          <div class="clausula-contrato">
+            <span class="destacar">CLÁUSULA QUARTA - DAS BENFEITORIAS:</span>
+            O(A) LOCATÁRIO(A) obriga-se a não fazer instalação, adaptação, obra
+            ou benfeitoria, sem prévia obtenção de autorização expressa do(a)
+            LOCADOR(A), caso contrário ficará sujeito à aceitação ou não do(a)
+            LOCADOR(A), sendo que em caso de não aceitação, o(a) LOCATÁRIO(A)
+            obriga-se a devolver o imóvel da mesma forma que o recebeu. As
+            benfeitorias necessárias darão direito à indenização ou retenção
+            conforme os artigos 35 e 36 da Lei nº 8.245/91, enquanto as
+            benfeitorias úteis e voluptuárias não autorizadas não conferem ao(à)
+            LOCATÁRIO(A) direito de retenção ou indenização.
+          </div>
+          <div class="clausula-contrato">
+            <span class="destacar">CLÁUSULA QUINTA - DAS PROIBIÇÕES:</span> É
+            expressamente vedado ao(à) LOCATÁRIO(A):
+          </div>
+          <div class="subparagrafo-contrato">
+            a) Transferir este contrato, sublocar, ceder ou emprestar o imóvel,
+            total ou parcialmente, sob qualquer pretexto, sob pena de rescisão
+            imediata do contrato e aplicação das penalidades previstas nas
+            cláusulas contratuais.
+          </div>
+          <div class="subparagrafo-contrato">
+            b) Alterar a destinação da locação estabelecida na Cláusula
+            Primeira, sob pena de rescisão imediata do contrato.
+          </div>
+          <div class="clausula-contrato">
+            <span class="destacar"
+              >CLÁUSULA SEXTA - DA RESCISÃO E ENCERRAMENTO:</span
+            >
+            A infração de qualquer das obrigações consignadas neste contrato é
+            considerada de natureza grave, acarretando a rescisão contratual e a
+            consequente desocupação do imóvel.
+          </div>
+          <div class="paragrafo-contrato">
+            PARÁGRAFO PRIMEIRO: O presente contrato poderá ser rescindido por
+            qualquer das partes mediante notificação expressa e por escrito, com
+            antecedência mínima de 60 (sessenta) dias.
+          </div>
+          <div class="paragrafo-contrato">
+            PARÁGRAFO SEGUNDO: Caso o(a) LOCATÁRIO(A) deseje rescindir o
+            contrato antes do prazo final, deverá pagar multa proporcional ao
+            período de cumprimento do contrato, até o limite máximo de 3 (três)
+            meses de aluguel, conforme o art. 4º da Lei nº 8.245/91.
+          </div>
+          <div class="clausula-contrato">
+            <span class="destacar">CLÁUSULA SÉTIMA - DAS PENALIDADES:</span> Em
+            caso de atraso no pagamento dos aluguéis e encargos, ficará o(a)
+            LOCATÁRIO(A) obrigado(a) ao pagamento do valor principal, acrescido
+            de juros de mora de 1% (um por cento) ao mês e multa de 2% (dois por
+            cento), sem prejuízo dos demais acréscimos e penalidades.
+          </div>
+          <div class="paragrafo-contrato">
+            PARÁGRAFO ÚNICO: As partes obrigam-se a respeitar o presente
+            contrato em todas as suas cláusulas e condições, incorrendo a parte
+            que infringir qualquer disposição contratual em multa no valor de 2
+            (dois) aluguéis mensais, a ser paga integralmente à parte inocente,
+            sem que isso exima a parte infratora do cumprimento da obrigação
+            principal ou afaste o direito da parte inocente de requerer a
+            rescisão contratual sem prejuízo das penalidades específicas
+            previstas neste contrato.
+          </div>
+
+          <div class="clausula-contrato">
+            <span class="destacar"
+              >CLÁUSULA OITAVA - DA LEGISLAÇÃO APLICÁVEL E DISPOSIÇÕES
+              FINAIS:</span
+            >
+            A presente locação será sempre sujeita ao regime do Código Civil
+            Brasileiro e à Lei nº 8.245 de 1991 (Lei do Inquilinato), ficando
+            assegurados às partes todos os direitos e vantagens conferidas pela
+            legislação em vigor.
+          </div>
+          <div class="paragrafo-contrato">
+            PARÁGRAFO ÚNICO: Fica eleito o foro da Comarca de Colatina, Estado
+            do Espírito Santo, para dirimir quaisquer controvérsias oriundas
+            deste contrato, com renúncia a qualquer outro, por mais privilegiado
+            que seja.
+          </div>
+
+          <div class="paragrafo-contrato" style="margin-top: 0.75cm">
+            E assim, por estarem justos e acordados, firmam o presente CONTRATO
+            DE LOCAÇÃO, em 2 (duas) vias de igual forma e teor, na presença de 2
+            (duas) testemunhas, para que produza seus jurídicos e legais
+            efeitos.
+          </div>
+<div class="paragrafo-contrato-data">{{.Extra.date}}</div><div class="paragrafo-contrato-assinatura">___________________________________________________________________</div><div class="paragrafo-contrato-assinatura-dados">{{$l.name}} — CPF/CNPJ: {{doc $l.cpf_cnpj}} — LOCADOR(A)</div><div class="paragrafo-contrato-assinatura">___________________________________________________________________</div><div class="paragrafo-contrato-assinatura-dados">{{$t.name}} — CPF/CNPJ: {{doc $t.cpf_cnpj}} — LOCATÁRIO(A)</div><div class="testemunhas-container"><div class="testemunha">TESTEMUNHA<br>Nome:__________________________________<br>CPF:___________________________________</div><div class="testemunha">TESTEMUNHA<br>Nome:__________________________________<br>CPF:___________________________________</div></div></div></div><script src="/js/contract-editor.js"></script></section>{{end}}

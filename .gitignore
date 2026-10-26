@@ -1,0 +1,43 @@
+# Local configuration and credentials
+/config.json
+/config.*.json
+!/config.example.json
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Build output and test artifacts
+/bin/
+/dist/
+/coverage/
+coverage.out
+*.test
+*.prof
+
+# Local data and logs
+/data/
+/backups/
+/backup*.sql
+*.log
+*.log.*
+/log/
+/logs/
+
+# Editor and local tool settings
+/.vscode/
+/.idea/
+/.claude/
+/.codex/
+/.agents/
+/.aws/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db

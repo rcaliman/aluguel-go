@@ -1,0 +1,173 @@
+{{define "property-list"}}{{$model := uiModel .}}
+<section>
+<div class="container">
+<div class="page-header">
+<div class="d-flex justify-content-between align-items-center flex-wrap">
+<div>
+<h1 class="h3 mb-1">
+<i class="bi bi-house-door-fill me-2"></i> Lista de Imóveis
+              </h1>
+<p class="mb-0 opacity-75">
+                Gerencie todos os imóveis do sistema
+              </p>
+</div>
+{{if (canWrite $.User)}}<a class="btn btn-secondary" href="/properties/new">
+<i class="bi bi-plus-circle"></i> Novo Imóvel
+            </a>{{end}}
+</div>
+</div>
+<form method="post" action="/receipts/generate"><input type="hidden" name="_csrf" value="{{$.CSRF}}">
+<div class="card-custom">
+<div class="card-custom-header d-flex justify-content-between align-items-center">
+<span><i class="bi bi-list-ul me-2"></i> Imóveis Cadastrados</span>
+<span class="badge bg-light text-dark">{{uiText (uiAdd (uiLen (index $model "properties")) " imóveis")}}</span>
+</div>
+<div class="table-responsive">
+<table class="table table-hover table-striped mb-0">
+<thead>
+<tr>
+<th width="50" class="text-center">
+<input class="form-check-input property-checkbox" type="checkbox" id="checkAllTable" data-bs-toggle="tooltip" data-bs-placement="top" title="Clique aqui para marcar todos">
+</th>
+<th width="150">
+<a class="text-decoration-none text-dark" href="/properties?sortField=propertyType">
+                        Tipo
+                        {{if (uiEqual (index $model "sortField") "propertyType")}}<span class="ms-1 bi-sort-up"></span>{{end}}
+</a>
+</th>
+<th width="100">
+<a class="text-decoration-none text-dark" href="/properties?sortField=number">
+                        Número
+                        {{if (uiEqual (index $model "sortField") "number")}}<span class="ms-1 bi-sort-up"></span>{{end}}
+</a>
+</th>
+<th>
+<a class="text-decoration-none text-dark" href="/properties?sortField=tenant.name">
+                        Inquilino
+                        {{if (uiEqual (index $model "sortField") "tenant.name")}}<span class="ms-1 bi-sort-up"></span>{{end}}
+</a>
+</th>
+<th>Observação</th>
+<th width="120" class="text-center">
+<a class="text-decoration-none text-dark" href="/properties?sortField=paymentDay">
+                        Dia Pgto.
+                        {{if (uiEqual (index $model "sortField") "paymentDay")}}<span class="ms-1 bi-sort-up"></span>{{end}}
+</a>
+</th>
+<th width="120" class="text-end">
+<a class="text-decoration-none text-dark" href="/properties?sortField=value">
+                        Valor R$
+                        {{if (uiEqual (index $model "sortField") "value")}}<span class="ms-1 bi-sort-up"></span>{{end}}
+</a>
+</th>
+{{if (canWrite $.User)}}<th width="120" class="text-center">
+                      Ações
+                    </th>{{end}}
+</tr>
+</thead>
+<tbody>
+{{range $index, $prop := (index $model "properties")}}<tr>
+<td class="text-center">
+<input class="form-check-input property-checkbox" type="checkbox" name="propertyIds" value="{{uiText (uiField $prop "id")}}" {{if (uiEqual (uiField $prop "tenant") nil)}}disabled{{end}}>
+</td>
+<td>
+<div>
+<span class="badge bg-ctp-surface2">{{uiText (uiField (uiField $prop "propertyType") "displayName")}}</span>
+</div>
+{{if (uiField $prop "complement")}}<small class="text-muted">{{uiText (uiField $prop "complement")}}</small>{{end}}
+</td>
+
+
+
+<td>
+<div class="d-flex align-items-center">
+<a class="me-2 text-ctp-lavender" data-bs-toggle="tooltip" data-bs-placement="top" title="Clique aqui para ver mais informações" href="/infopage/{{uiText (uiField $prop "id")}}">
+<i class="bi bi-info-circle-fill"></i>
+</a>
+<span>{{uiText (uiField $prop "number")}}</span>
+</div>
+</td>
+
+<td class="name-cell">
+{{if (uiDifferent (uiField $prop "tenant") nil)}}<span class="d-flex align-items-center">
+<a class="me-2 text-ctp-maroon" data-bs-toggle="tooltip" data-bs-placement="top" title="Clique aqui para gerar contrato" href="/contracts/form/{{uiText (uiField $prop "id")}}">
+<i class="bi bi-file-earmark-text"></i>
+</a>
+<span class="fw-medium">{{uiText (uiField (uiField $prop "tenant") "name")}}</span>
+</span>{{end}}
+{{if (uiEqual (uiField $prop "tenant") nil)}}<span class="badge badge-vacant">Vago</span>{{end}}
+</td>
+<td>
+{{if (and (uiDifferent (uiField $prop "observation") nil) (uiNot (uiEmpty (uiField $prop "observation"))))}}<small class="text-muted">{{uiText (uiField $prop "observation")}}</small>{{end}}
+</td>
+<td class="text-center">{{uiText (uiField $prop "paymentDay")}}</td>
+<td class="fw-bold text-end">{{uiText (uiMoney (uiField $prop "value"))}}</td>
+{{if (canWrite $.User)}}<td class="text-center">
+<div class="action-buttons">
+<a class="action-btn action-btn-edit" title="Editar" href="/properties/edit/{{uiText (uiField $prop "id")}}">
+<i class="bi bi-pencil"></i>
+</a>
+<button class="action-btn action-btn-delete" title="Excluir" type="button" data-delete="/properties/delete/{{uiText (uiField $prop "id")}}">
+<i class="bi bi-trash"></i>
+</button>
+</div>
+</td>{{end}}
+</tr>{{end}}
+{{if (uiField (index $model "properties") "empty")}}<tr>
+<td colspan="8" class="text-center py-4">
+<i class="bi bi-inbox display-4 text-muted d-block mb-2"></i>
+<span class="text-muted">Nenhum imóvel cadastrado</span>
+</td>
+</tr>{{end}}
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="card-custom">
+<div class="card-custom-header">
+<i class="bi bi-file-earmark-text me-2"></i> Gerar Recibos para
+              Imóveis Selecionados
+            </div>
+<div class="card-custom-body">
+<div class="row align-items-end">
+<div class="col-md-5 mb-3 mb-md-0">
+<label for="landlordId" class="form-label">Locador (quem assina o recibo)</label>
+<select id="landlordId" name="landlordId" class="form-select" required="">
+<option value="">Selecione um locador...</option>
+{{range $index, $landlord := (index $model "landlords")}}<option value="{{uiText (uiField $landlord "id")}}" {{if (uiField $landlord "main")}}selected{{end}}>{{uiText (uiField $landlord "name")}}</option>{{end}}
+</select>
+</div>
+<div class="col-md-2 mb-3 mb-md-0">
+<label for="month" class="form-label">Mês</label>
+<select id="month" name="month" class="form-select" required="">
+<option value="Janeiro">Janeiro</option>
+<option value="Fevereiro">Fevereiro</option>
+<option value="Março">Março</option>
+<option value="Abril">Abril</option>
+<option value="Maio">Maio</option>
+<option value="Junho">Junho</option>
+<option value="Julho">Julho</option>
+<option value="Agosto">Agosto</option>
+<option value="Setembro">Setembro</option>
+<option value="Outubro">Outubro</option>
+<option value="Novembro">Novembro</option>
+<option value="Dezembro">Dezembro</option>
+</select>
+</div>
+<div class="col-md-2 mb-3 mb-md-0">
+<label for="year" class="form-label">Ano</label>
+<select id="year" name="year" class="form-select" required=""></select>
+</div>
+<div class="col-md-3">
+<button type="submit" class="btn btn-primary w-100" id="generateReceiptsBtn" disabled="">
+<i class="bi bi-file-earmark-text"></i> Gerar Recibos
+                  </button>
+</div>
+</div>
+</div>
+</div>
+</form>
+</div>
+</section>
+{{end}}

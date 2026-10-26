@@ -1,0 +1,65 @@
+{{define "user-form"}}{{$model := uiModel .}}
+<section>
+<div class="container">
+<div class="page-header">
+<div class="d-flex justify-content-between align-items-center flex-wrap">
+<div>
+<h1 class="h3 mb-1">{{uiText (uiChoose (uiEqual (uiField (index $model "user") "id") nil) "Adicionar Novo Usuário" "Editar Usuário")}}</h1>
+<p class="mb-0 opacity-75">Preencha os dados do usuário abaixo</p>
+</div>
+<a href="javascript:history.back()" class="btn btn-secondary">
+<i class="bi bi-arrow-left-circle"></i> Voltar
+            </a>
+</div>
+</div>
+<div class="row justify-content-center">
+<div class="col-lg-8">
+<div class="card-custom">
+<div class="card-custom-header">
+<span><i class="bi bi-pencil-square me-2"></i> Dados do
+                  Usuário</span>
+</div>
+<div class="card-custom-body">
+<form method="post" action="/users"><input type="hidden" name="_csrf" value="{{$.CSRF}}">
+<input type="hidden" name="id" id="id" value="{{uiText (uiFormValue (uiField (index $model "user") "id"))}}">
+<h5 class="form-section-title">
+<i class="bi bi-person-vcard"></i> Informações de Acesso
+                  </h5>
+<div class="row">
+<div class="col-md-12 mb-3">
+<label for="username" class="form-label">Nome de Usuário</label>
+<input type="text" class="form-control" id="username" required="" placeholder="Digite o nome de usuário" name="username" value="{{uiText (uiFormValue (uiField (index $model "user") "username"))}}">
+</div>
+</div>
+<div class="row">
+<div class="col-md-6 mb-3">
+<label for="password" class="form-label">
+                        Senha
+                        {{if (uiDifferent (uiField (index $model "user") "id") nil)}}<span class="text-muted">(deixe em branco para não alterar)</span>{{end}}
+</label>
+<input type="password" class="form-control" id="password" placeholder="Digite a senha" {{if (uiEqual (uiField (index $model "user") "id") nil)}}required{{end}} name="password" autocomplete="new-password">
+</div>
+<div class="col-md-6 mb-3">
+<label for="role" class="form-label">Perfil</label>
+<select class="form-select" id="role" required="" name="role">
+<option value="">Selecione...</option>
+{{range $index, $roleOption := (index $model "roles")}}<option value="{{uiText (uiField $roleOption "name")}}" {{if uiEqual (uiFormValue (uiField $roleOption "name")) (uiFormValue (uiField (index $model "user") "role"))}}selected{{end}}>{{uiText (uiField $roleOption "displayName")}}</option>{{end}}
+</select>
+</div>
+</div>
+<div class="d-flex justify-content-end gap-3 pt-4 mt-3 border-top">
+<a class="btn btn-secondary" href="/users">
+<i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+<button type="submit" class="btn btn-primary">
+<i class="bi bi-check-circle"></i> Salvar
+                    </button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+{{end}}

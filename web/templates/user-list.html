@@ -1,0 +1,66 @@
+{{define "user-list"}}{{$model := uiModel .}}
+<section>
+<div class="container">
+<div class="page-header">
+<div class="d-flex justify-content-between align-items-center flex-wrap">
+<div>
+<h1 class="h3 mb-1">
+<i class="bi bi-people-fill me-2"></i> Lista de Usuários
+              </h1>
+<p class="mb-0 opacity-75">Gerencie os usuários do sistema.</p>
+</div>
+<a class="btn btn-secondary" href="/users/new">
+<i class="bi bi-plus-circle"></i> Novo Usuário
+            </a>
+</div>
+</div>
+<div class="card-custom">
+<div class="card-custom-header">
+<i class="bi bi-list-ul me-2"></i> Usuários Cadastrados
+          </div>
+<div class="table-responsive">
+<table class="table table-hover table-striped mb-0 table-sm">
+<thead>
+<tr>
+<th>Nome de Usuário</th>
+<th>Perfil</th>
+<th>Data de Criação</th>
+<th class="text-center th-col-actions">Ações</th>
+</tr>
+</thead>
+<tbody>
+{{range $index, $user := (index $model "users")}}<tr>
+<td class="name-cell" title="{{uiText (uiField $user "username")}}">{{uiText (uiField $user "username")}}</td>
+<td>
+<span class="badge {{uiText (uiChoose (uiEqual (uiField (uiField $user "role") "name") "ADMIN") "bg-ctp-maroon" "bg-ctp-sapphire")}}">{{uiText (uiField (uiField $user "role") "displayName")}}</span>
+</td>
+<td>{{uiText (uiChoose (uiDifferent (uiField $user "createdAt") nil) (uiDate (uiField $user "createdAt") "dd/MM/yyyy HH:mm") "-")}}</td>
+<td class="text-center">
+<div class="action-buttons">
+<a class="action-btn action-btn-edit" title="Editar" href="/users/edit/{{uiText (uiField $user "id")}}">
+<i class="bi bi-pencil"></i>
+</a>
+{{if (uiEqual (uiField (uiField $user "role") "name") "ADMIN")}}<button disabled="" class="action-btn action-btn-delete" title="Proibido para o usuário logado">
+<i class="bi bi-trash"></i>
+</button>{{end}}
+{{if (uiDifferent (uiField $user "username") (uiField $.User "name"))}}<form method="post" class="d-inline" onsubmit="return confirm(&#x27;Tem certeza que deseja excluir este usuário?&#x27;);" action="/users/delete/{{uiText (uiField $user "id")}}"><input type="hidden" name="_csrf" value="{{$.CSRF}}">
+<button type="submit" class="action-btn action-btn-delete" title="Excluir">
+<i class="bi bi-trash"></i>
+</button>
+</form>{{end}}
+</div>
+</td>
+</tr>{{end}}
+{{if (uiEmpty (index $model "users"))}}<tr>
+<td colspan="4" class="text-center py-4">
+<i class="bi bi-inbox display-4 text-muted d-block mb-2"></i>
+<span class="text-muted">Nenhum usuário cadastrado</span>
+</td>
+</tr>{{end}}
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+{{end}}

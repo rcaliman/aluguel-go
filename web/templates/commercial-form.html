@@ -1,0 +1,57 @@
+{{define "commercial-form"}}{{$model := uiModel .}}
+<section>
+<div class="container">
+<div class="page-header">
+<div class="d-flex justify-content-between align-items-center flex-wrap">
+<div>
+<h1 class="h3 mb-1">{{uiText (uiChoose (uiEqual (uiField (index $model "commercialEnergy") "id") nil) "Nova Leitura de Energia Comercial" "Editar Leitura de Energia Comercial")}}</h1>
+<p class="mb-0 opacity-75">Preencha os dados da medição abaixo</p>
+</div>
+<a href="javascript:history.back()" class="btn btn-secondary">
+<i class="bi bi-arrow-left-circle"></i> Voltar
+            </a>
+</div>
+</div>
+<div class="card-custom">
+<div class="card-custom-header">
+<span><i class="bi bi-input-cursor-text me-2"></i> Dados da
+              Leitura</span>
+</div>
+<div class="card-custom-body">
+<form method="post" action="/energies/save-commercial"><input type="hidden" name="_csrf" value="{{$.CSRF}}">{{if (uiDifferent (uiField (index $model "commercialEnergy") "id") nil)}}<p class="alert alert-info">Somente a última leitura de cada tabela pode ser alterada. As leituras anteriores ficam protegidas.</p>{{end}}
+<input type="hidden" name="id" id="id" value="{{uiText (uiFormValue (uiField (index $model "commercialEnergy") "id"))}}">
+<div class="row">
+<div class="col-md-3 mb-3">
+<label for="date" class="form-label">Data da Leitura</label>
+<input type="date" class="form-control" id="date" name="date" required="" value="{{uiText (uiChoose (uiDifferent (uiField (index $model "commercialEnergy") "date") nil) (uiDate (uiField (index $model "commercialEnergy") "date") "yyyy-MM-dd") "")}}">
+</div>
+<div class="col-md-3 mb-3">
+<label for="accountConsumption" class="form-label">Consumo da Conta (kWh)</label>
+<input type="number" step="0.01" class="form-control" id="accountConsumption" name="accountConsumption" required="" placeholder="0.00" value="{{uiText (uiChoose (uiDifferent (uiField (index $model "commercialEnergy") "accountConsumption") nil) (uiDecimal (uiField (index $model "commercialEnergy") "accountConsumption") 1 2 "POINT") "")}}">
+</div>
+<div class="col-md-3 mb-3">
+<label for="accountValue" class="form-label">Valor Total da Conta</label>
+<div class="input-group">
+<span class="input-group-text">R$</span>
+<input type="number" step="0.01" class="form-control" id="accountValue" name="accountValue" required="" placeholder="0.00" value="{{uiText (uiChoose (uiDifferent (uiField (index $model "commercialEnergy") "accountValue") nil) (uiDecimal (uiField (index $model "commercialEnergy") "accountValue") 1 2 "POINT") "")}}">
+</div>
+</div>
+<div class="col-md-3 mb-3">
+<label for="internalCounter" class="form-label">Medidor Interno</label>
+<input type="number" step="0.01" class="form-control" id="internalCounter" name="internalCounter" required="" placeholder="0,00" value="{{uiText (uiChoose (uiDifferent (uiField (index $model "commercialEnergy") "internalCounter") nil) (uiDecimal (uiField (index $model "commercialEnergy") "internalCounter") 1 2 "POINT") "")}}">
+</div>
+</div>
+<div class="d-flex justify-content-end gap-3 pt-4 mt-3 border-top">
+<a class="btn btn-secondary" href="/energies">
+<i class="bi bi-x-circle"></i> Cancelar
+                </a>
+<button type="submit" class="btn btn-primary">
+<i class="bi bi-check-circle"></i> Salvar
+                </button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</section>
+{{end}}

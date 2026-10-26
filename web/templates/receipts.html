@@ -1,0 +1,186 @@
+{{define "receipts"}}{{$model := uiModel .}}
+<section>
+<div class="page-header no-print d-flex justify-content-between align-items-center">
+<div>
+<h1 class="h3 mb-1">
+<i class="bi bi-file-earmark-text-fill me-2"></i> Recibos Gerados
+          </h1>
+<p class="mb-0 opacity-75">Prontos para impressão</p>
+</div>
+<a href="javascript:history.back()" class="btn btn-secondary">
+<i class="bi bi-arrow-left"></i> Voltar
+        </a>
+</div>
+<div class="toolbar no-print">
+<div class="ms-auto">
+<button onclick="window.print();" class="btn btn-primary">
+<i class="bi bi-printer"></i> Imprimir Recibos
+          </button>
+</div>
+</div>
+<div id="print-area">
+{{if (uiEmpty (index $model "receipts"))}}<div class="no-print">
+<p class="alert alert-warning">Nenhum recibo foi gerado.</p>
+</div>{{end}}
+{{range $index, $receipt := (index $model "receipts")}}<div class="printable-page">
+
+{{if (and (uiDifferent (uiField $receipt "propertyType") nil) (uiDifferent (uiField (uiField $receipt "propertyType") "name") "CONDOMINIO"))}}<div>
+
+<div class="receipt-copy top-copy">
+<div>
+<div class="receipt-header d-flex justify-content-between align-items-center mb-4">
+<h1 class="mb-1">RECIBO</h1>
+<div class="copy-indicator">LOCAÇÃO</div>
+</div>
+<div class="receipt-body">
+<p>
+                    Recebi, de
+                    <strong>{{uiText (uiAdd (uiField $receipt "tenant") (uiChoose (uiEmpty (uiField $receipt "tenantDocument")) "" (uiAdd (uiAdd " (" (uiField $receipt "tenantDocument")) ")")))}}</strong>, a
+                    importância de
+                    <strong>{{uiText (uiField $receipt "value")}}</strong>
+                    referente ao aluguel do(a)
+                    {{uiText (uiLower (uiField $receipt "propertyType"))}}
+                    nº
+                    <strong>{{uiText (uiField $receipt "propertyNumber")}}</strong>. 
+                    <span>{{uiText (uiField $receipt "observation")}}</span>. # . # . # .
+                    # . # . # . # . # . # . # . # . # . # . # . #
+                  </p>
+</div>
+</div>
+<div>
+<p class="text-center mb-0">{{uiText (uiAdd (uiAdd (uiAdd (uiAdd (uiAdd (uiAdd (uiAdd (uiField $receipt "locale") ", ") (uiField $receipt "day")) " de ") (uiField $receipt "month")) " de ") (uiField $receipt "year")) ".")}}</p>
+<div class="signature-line">
+                  _______________________________________________<br>
+<strong>{{uiText (uiAdd (uiField $receipt "landlord") (uiChoose (uiEmpty (uiField $receipt "landlordCpf")) "" (uiAdd (uiAdd " (" (uiField $receipt "landlordCpf")) ")")))}}</strong><br>
+<span>(Locador/Procurador)</span>
+</div>
+{{if (and (uiDifferent (uiField $receipt "tenantContact") nil) (uiNot (uiEmpty (uiField $receipt "tenantContact"))))}}<div class="tenant-contact-info">
+<span>{{uiText (uiField $receipt "tenantContact")}}</span>
+</div>{{end}}
+</div>
+</div>
+
+
+<div class="receipt-copy">
+<div>
+<div class="receipt-header d-flex justify-content-between align-items-center mb-4">
+<h1 class="mb-1">RECIBO</h1>
+<div class="copy-indicator">LOCAÇÃO</div>
+</div>
+<div class="receipt-body">
+<p>
+                    Recebi, de
+                    <strong>{{uiText (uiAdd (uiField $receipt "tenant") (uiChoose (uiEmpty (uiField $receipt "tenantDocument")) "" (uiAdd (uiAdd " (" (uiField $receipt "tenantDocument")) ")")))}}</strong>, a
+                    importância de
+                    <strong>{{uiText (uiField $receipt "value")}}</strong>
+
+                    referente ao aluguel do(a)
+                    {{uiText (uiLower (uiField $receipt "propertyType"))}}
+                    nº
+                    <strong>{{uiText (uiField $receipt "propertyNumber")}}</strong>. 
+                    <span>{{uiText (uiField $receipt "observation")}}</span>. # . # . # .
+                    # . # . # . # . # . # . # . # . # . # . # . #
+                  </p>
+</div>
+</div>
+<div>
+<p class="text-center mb-0">{{uiText (uiAdd (uiAdd (uiAdd (uiAdd (uiAdd (uiAdd (uiAdd (uiField $receipt "locale") ", ") (uiField $receipt "day")) " de ") (uiField $receipt "month")) " de ") (uiField $receipt "year")) ".")}}</p>
+<div class="signature-line">
+                  _______________________________________________<br>
+<strong>{{uiText (uiAdd (uiField $receipt "landlord") (uiChoose (uiEmpty (uiField $receipt "landlordCpf")) "" (uiAdd (uiAdd " (" (uiField $receipt "landlordCpf")) ")")))}}</strong><br>
+<span>(Locador/Procurador)</span>
+</div>
+{{if (and (uiDifferent (uiField $receipt "tenantContact") nil) (uiNot (uiEmpty (uiField $receipt "tenantContact"))))}}<div class="tenant-contact-info">
+<span>{{uiText (uiField $receipt "tenantContact")}}</span>
+</div>{{end}}
+</div>
+</div>
+
+</div>{{end}}
+
+
+{{if (and (uiDifferent (uiField $receipt "propertyType") nil) (uiEqual (uiField (uiField $receipt "propertyType") "name") "CONDOMINIO"))}}<div>
+
+<div class="receipt-copy top-copy">
+<div>
+<div class="receipt-header d-flex justify-content-between align-items-center mb-4">
+<h1 class="mb-1">RECIBO</h1>
+<div class="copy-indicator">CONDOMÍNIO</div>
+</div>
+<div class="receipt-body">
+<p>
+                    Recebi, de
+                    <strong>{{uiText (uiAdd (uiField $receipt "tenant") (uiChoose (uiEmpty (uiField $receipt "tenantDocument")) "" (uiAdd (uiAdd " (" (uiField $receipt "tenantDocument")) ")")))}}</strong>, a
+                    importância de
+                    <strong>{{uiText (uiField $receipt "value")}}</strong>
+
+                    referente ao pagamento do
+                    {{uiText (uiLower (uiField $receipt "propertyType"))}}
+                    do mês de
+                    <strong>{{uiText (uiLower (uiField $receipt "month"))}}</strong>
+                    de
+                    <strong>{{uiText (uiField $receipt "year")}}</strong>, correspondente
+                    a <strong>{{uiText (uiField $receipt "observation")}}</strong>, no
+                    Edifício Caliman. # . # . # . # . # . # . # . # . # . # . #
+                    . # . # . #
+                  </p>
+</div>
+</div>
+<div>
+<p class="text-center mb-0">{{uiText (uiAdd (uiAdd (uiAdd (uiAdd (uiAdd (uiAdd (uiAdd (uiField $receipt "locale") ", ") (uiField $receipt "day")) " de ") (uiField $receipt "nextMonth")) " de ") (uiChoose (uiEqual (uiField $receipt "month") "Dezembro") (uiField $receipt "nextYear") (uiField $receipt "year"))) ".")}}</p>
+<div class="signature-line">
+                  _______________________________________________<br>
+<strong>{{uiText (uiAdd (uiField $receipt "landlord") (uiChoose (uiEmpty (uiField $receipt "landlordCpf")) "" (uiAdd (uiAdd " (" (uiField $receipt "landlordCpf")) ")")))}}</strong><br>
+<span>(ou procurador)</span>
+</div>
+{{if (and (uiDifferent (uiField $receipt "tenantContact") nil) (uiNot (uiEmpty (uiField $receipt "tenantContact"))))}}<div class="tenant-contact-info">
+<span>{{uiText (uiField $receipt "tenantContact")}}</span>
+</div>{{end}}
+</div>
+</div>
+
+
+<div class="receipt-copy">
+<div>
+<div class="receipt-header d-flex justify-content-between align-items-center mb-4">
+<h1 class="mb-1">RECIBO</h1>
+<div class="copy-indicator">CONDOMÍNIO</div>
+</div>
+<div class="receipt-body">
+<p>
+                    Recebi, de
+                    <strong>{{uiText (uiAdd (uiField $receipt "tenant") (uiChoose (uiEmpty (uiField $receipt "tenantDocument")) "" (uiAdd (uiAdd " (" (uiField $receipt "tenantDocument")) ")")))}}</strong>, a
+                    importância de
+                    <strong>{{uiText (uiField $receipt "value")}}</strong>
+
+                    referente ao pagamento do
+                    {{uiText (uiLower (uiField $receipt "propertyType"))}}
+                    do mês de
+                    <strong>{{uiText (uiLower (uiField $receipt "month"))}}</strong>
+                    de
+                    <strong>{{uiText (uiField $receipt "year")}}</strong>, correspondente
+                    a <strong>{{uiText (uiField $receipt "observation")}}</strong>, no
+                    Edifício Caliman. # . # . # . # . # . # . # . # . # . # . #
+                    . # . # . #
+                  </p>
+</div>
+</div>
+<div>
+<p class="text-center mb-0">{{uiText (uiAdd (uiAdd (uiAdd (uiAdd (uiAdd (uiAdd (uiAdd (uiField $receipt "locale") ", ") (uiField $receipt "day")) " de ") (uiField $receipt "nextMonth")) " de ") (uiChoose (uiEqual (uiField $receipt "month") "Dezembro") (uiField $receipt "nextYear") (uiField $receipt "year"))) ".")}}</p>
+<div class="signature-line">
+                  _______________________________________________<br>
+<strong>{{uiText (uiAdd (uiField $receipt "landlord") (uiChoose (uiEmpty (uiField $receipt "landlordCpf")) "" (uiAdd (uiAdd " (" (uiField $receipt "landlordCpf")) ")")))}}</strong><br>
+<span>(ou procurador)</span>
+</div>
+{{if (and (uiDifferent (uiField $receipt "tenantContact") nil) (uiNot (uiEmpty (uiField $receipt "tenantContact"))))}}<div class="tenant-contact-info">
+<span>{{uiText (uiField $receipt "tenantContact")}}</span>
+</div>{{end}}
+</div>
+</div>
+
+</div>{{end}}
+
+</div>{{end}}
+</div>
+</section>
+{{end}}

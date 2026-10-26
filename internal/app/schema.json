@@ -1,0 +1,522 @@
+[
+  {
+    "Key": "tenants",
+    "Table": "tb_tenants",
+    "Title": "Inquilinos",
+    "Timestamps": true,
+    "Fields": [
+      {
+        "Name": "name",
+        "Column": "name",
+        "Label": "Nome",
+        "Kind": "text",
+        "Required": true,
+        "Derived": false
+      },
+      {
+        "Name": "document",
+        "Column": "document",
+        "Label": "RG / documento",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "cpfCnpj",
+        "Column": "cpf_cnpj",
+        "Label": "CPF/CNPJ",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "dateOfBirth",
+        "Column": "date_of_birth",
+        "Label": "Data de nascimento",
+        "Kind": "date",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "address",
+        "Column": "address",
+        "Label": "Logradouro",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "location",
+        "Column": "location",
+        "Label": "Bairro",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "state",
+        "Column": "state",
+        "Label": "Estado",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "city",
+        "Column": "city",
+        "Label": "Cidade",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "maritalStatus",
+        "Column": "marital_status",
+        "Label": "Estado civil",
+        "Kind": "MaritalStatusEnum",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "nationality",
+        "Column": "nationality",
+        "Label": "Nacionalidade",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      }
+    ]
+  },
+  {
+    "Key": "landlords",
+    "Table": "tb_landlords",
+    "Title": "Locadores",
+    "Timestamps": true,
+    "Fields": [
+      {
+        "Name": "name",
+        "Column": "name",
+        "Label": "Nome",
+        "Kind": "text",
+        "Required": true,
+        "Derived": false
+      },
+      {
+        "Name": "document",
+        "Column": "document",
+        "Label": "RG / documento",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "cpfCnpj",
+        "Column": "cpf_cnpj",
+        "Label": "CPF/CNPJ",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "dateOfBirth",
+        "Column": "date_of_birth",
+        "Label": "Data de nascimento",
+        "Kind": "date",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "address",
+        "Column": "address",
+        "Label": "Logradouro",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "location",
+        "Column": "location",
+        "Label": "Bairro",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "state",
+        "Column": "state",
+        "Label": "Estado",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "city",
+        "Column": "city",
+        "Label": "Cidade",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "maritalStatus",
+        "Column": "marital_status",
+        "Label": "Estado civil",
+        "Kind": "MaritalStatusEnum",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "nationality",
+        "Column": "nationality",
+        "Label": "Nacionalidade",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "main",
+        "Column": "main",
+        "Label": "Locador principal",
+        "Kind": "checkbox",
+        "Required": false,
+        "Derived": false
+      }
+    ]
+  },
+  {
+    "Key": "properties",
+    "Table": "tb_properties",
+    "Title": "Imóveis",
+    "Timestamps": true,
+    "Fields": [
+      {
+        "Name": "propertyType",
+        "Column": "property_type",
+        "Label": "Tipo de imóvel",
+        "Kind": "PropertyTypeEnum",
+        "Required": true,
+        "Derived": false
+      },
+      {
+        "Name": "useType",
+        "Column": "use_type",
+        "Label": "Tipo de uso",
+        "Kind": "PropertyUseTypeEnum",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "address",
+        "Column": "address",
+        "Label": "Logradouro",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "location",
+        "Column": "location",
+        "Label": "Bairro",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "state",
+        "Column": "state",
+        "Label": "Estado",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "city",
+        "Column": "city",
+        "Label": "Cidade",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "number",
+        "Column": "number",
+        "Label": "Número",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "complement",
+        "Column": "complement",
+        "Label": "Complemento",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "tenant",
+        "Column": "tenant_id",
+        "Label": "Inquilino",
+        "Kind": "tenant",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "value",
+        "Column": "rental_value",
+        "Label": "Valor do aluguel",
+        "Kind": "number",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "observation",
+        "Column": "observation",
+        "Label": "Observação",
+        "Kind": "textarea",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "paymentDay",
+        "Column": "payment_day",
+        "Label": "Dia de pagamento",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      }
+    ]
+  },
+  {
+    "Key": "users",
+    "Table": "tb_users",
+    "Title": "Usuários",
+    "Timestamps": true,
+    "Fields": [
+      {
+        "Name": "username",
+        "Column": "username",
+        "Label": "Usuário",
+        "Kind": "text",
+        "Required": true,
+        "Derived": false
+      },
+      {
+        "Name": "password",
+        "Column": "password",
+        "Label": "Senha",
+        "Kind": "password",
+        "Required": true,
+        "Derived": false
+      },
+      {
+        "Name": "role",
+        "Column": "role",
+        "Label": "Permissão",
+        "Kind": "RoleEnum",
+        "Required": true,
+        "Derived": false
+      }
+    ]
+  },
+  {
+    "Key": "energies",
+    "Table": "tb_energy",
+    "Title": "Energia residencial",
+    "Timestamps": false,
+    "Fields": [
+      {
+        "Name": "counter1",
+        "Column": "counter_1",
+        "Label": "Medidor 1",
+        "Kind": "number",
+        "Required": true,
+        "Derived": false
+      },
+      {
+        "Name": "counter2",
+        "Column": "counter_2",
+        "Label": "Medidor 2",
+        "Kind": "number",
+        "Required": true,
+        "Derived": false
+      },
+      {
+        "Name": "counter3",
+        "Column": "counter_3",
+        "Label": "Medidor 3",
+        "Kind": "number",
+        "Required": true,
+        "Derived": false
+      },
+      {
+        "Name": "amount1",
+        "Column": "amount_1",
+        "Label": "amount1",
+        "Kind": "number",
+        "Required": false,
+        "Derived": true
+      },
+      {
+        "Name": "amount2",
+        "Column": "amount_2",
+        "Label": "amount2",
+        "Kind": "number",
+        "Required": false,
+        "Derived": true
+      },
+      {
+        "Name": "amount3",
+        "Column": "amount_3",
+        "Label": "amount3",
+        "Kind": "number",
+        "Required": false,
+        "Derived": true
+      },
+      {
+        "Name": "kwhValue",
+        "Column": "kwh_value",
+        "Label": "Valor do kWh",
+        "Kind": "number",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "billAmount",
+        "Column": "bill_amount",
+        "Label": "Valor da conta",
+        "Kind": "number",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "date",
+        "Column": "date",
+        "Label": "Data",
+        "Kind": "date",
+        "Required": false,
+        "Derived": false
+      }
+    ]
+  },
+  {
+    "Key": "commercial",
+    "Table": "tb_commercial_energy",
+    "Title": "Energia comercial",
+    "Timestamps": false,
+    "Fields": [
+      {
+        "Name": "amount1",
+        "Column": "amount_1",
+        "Label": "amount1",
+        "Kind": "number",
+        "Required": false,
+        "Derived": true
+      },
+      {
+        "Name": "amount2",
+        "Column": "amount_2",
+        "Label": "amount2",
+        "Kind": "number",
+        "Required": false,
+        "Derived": true
+      },
+      {
+        "Name": "internalCounter",
+        "Column": "internal_counter",
+        "Label": "Medidor interno",
+        "Kind": "number",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "accountValue",
+        "Column": "account_value",
+        "Label": "Valor da conta",
+        "Kind": "number",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "accountConsumption",
+        "Column": "account_consumption",
+        "Label": "Consumo da conta",
+        "Kind": "number",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "calculatedConsumption1",
+        "Column": "calculated_consumption_1",
+        "Label": "calculatedConsumption1",
+        "Kind": "number",
+        "Required": false,
+        "Derived": true
+      },
+      {
+        "Name": "calculatedConsumption2",
+        "Column": "calculated_consumption_2",
+        "Label": "calculatedConsumption2",
+        "Kind": "number",
+        "Required": false,
+        "Derived": true
+      },
+      {
+        "Name": "date",
+        "Column": "date",
+        "Label": "Data",
+        "Kind": "date",
+        "Required": false,
+        "Derived": false
+      }
+    ]
+  },
+  {
+    "Key": "titles",
+    "Table": "tb_energy_title",
+    "Title": "Títulos de energia",
+    "Timestamps": false,
+    "Fields": [
+      {
+        "Name": "titleAmount1",
+        "Column": "title_amount_1",
+        "Label": "titleAmount1",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "titleAmount2",
+        "Column": "title_amount_2",
+        "Label": "titleAmount2",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "titleAmount3",
+        "Column": "title_amount_3",
+        "Label": "titleAmount3",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "titleAmount4",
+        "Column": "title_amount_4",
+        "Label": "titleAmount4",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
+        "Name": "titleAmount5",
+        "Column": "title_amount_5",
+        "Label": "titleAmount5",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      }
+    ]
+  }
+]

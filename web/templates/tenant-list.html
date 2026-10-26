@@ -1,0 +1,95 @@
+{{define "tenant-list"}}{{$model := uiModel .}}
+<section>
+<div class="container">
+<div class="page-header">
+<div class="d-flex justify-content-between align-items-center flex-wrap">
+<div>
+<h1 class="h3 mb-1">
+<i class="bi bi-people-fill me-2"></i> Inquilinos
+              </h1>
+<p class="mb-0 opacity-75">
+                Gerencie todos os inquilinos do sistema
+              </p>
+</div>
+{{if (canWrite $.User)}}<a class="btn btn-secondary" href="/tenants/new">
+<i class="bi bi-plus-circle"></i> Novo Inquilino
+            </a>{{end}}
+</div>
+</div>
+<div class="card-custom">
+<div class="card-custom-header d-flex justify-content-between align-items-center">
+<span><i class="bi bi-list-ul me-2"></i> Inquilinos Cadastrados</span>
+<span class="badge bg-light text-dark">{{uiText (uiAdd (uiLen (index $model "tenants")) " inquilinos")}}</span>
+</div>
+<div class="table-responsive">
+<table class="table table-striped table-hover mb-0 table-sm">
+<thead>
+<tr>
+<th>Nome</th>
+<th class="hide-on-mobile">CPF/CNPJ</th>
+<th class="hide-on-mobile">Cidade/Estado</th>
+<th>Contatos</th>
+{{if (canWrite $.User)}}<th class="text-center" width="120">
+                    Ações
+                  </th>{{end}}
+</tr>
+</thead>
+<tbody>
+{{range $index, $tenant := (index $model "tenants")}}<tr>
+<td class="name-cell {{uiText (uiChoose (uiEmpty (uiField $tenant "properties")) "fst-italic" "")}}" title="{{uiText (uiField $tenant "name")}}">{{uiText (uiField $tenant "name")}}</td>
+<td class="cpf-cnpj-display hide-on-mobile">{{uiText (uiField $tenant "cpfCnpj")}}</td>
+<td class="hide-on-mobile">{{uiText (uiChoose (uiDifferent (uiField $tenant "city") nil) (uiAdd (uiAdd (uiField $tenant "city") " - ") (uiField $tenant "state")) "")}}</td>
+<td class="contact-cell">
+{{range $index, $contact := (uiField $tenant "contacts")}}{{$iterStat := uiIteration $index}}<div class="contact-item">
+<small>{{uiText (uiField $contact "contact")}}</small>
+</div>{{end}}
+</td>
+{{if (canWrite $.User)}}<td class="text-center">
+<div class="action-buttons">
+<a class="action-btn action-btn-edit" title="Editar" href="/tenants/edit/{{uiText (uiField $tenant "id")}}">
+<i class="bi bi-pencil"></i>
+</a>
+<button class="action-btn action-btn-delete" title="Excluir" type="button" data-delete="/tenants/delete/{{uiText (uiField $tenant "id")}}">
+<i class="bi bi-trash"></i>
+</button>
+</div>
+</td>{{end}}
+</tr>{{end}}
+{{if (uiEmpty (index $model "tenants"))}}<tr>
+<td colspan="8" class="text-center py-4">
+<i class="bi bi-inbox display-4 text-muted d-block mb-2"></i>
+<span class="text-muted">Nenhum inquilino cadastrado</span>
+</td>
+</tr>{{end}}
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<script>
+        // Adicionar links tel: para números de telefone
+        document.addEventListener("DOMContentLoaded", function () {
+          const contactItems = document.querySelectorAll(".contact-item small");
+
+          contactItems.forEach(function (item) {
+            const text = item.textContent.trim();
+            // Verifica se o texto é principalmente números (telefone)
+            // Remove espaços, parênteses, hífens e +
+            const cleanText = text.replace(/[\s\(\)\-\+]/g, "");
+
+            // Se tiver pelo menos 8 dígitos, considera como telefone
+            if (cleanText.match(/^\d{8,}$/)) {
+              const phoneNumber = cleanText;
+              const link = document.createElement("a");
+              link.href = "tel:" + phoneNumber;
+              link.textContent = text;
+              link.title = "Ligar para " + text;
+
+              item.textContent = "";
+              item.appendChild(link);
+            }
+          });
+        });
+      </script>
+</section>
+{{end}}
