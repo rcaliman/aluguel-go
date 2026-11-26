@@ -6,7 +6,7 @@ Inclui cadastros de imóveis, inquilinos, locadores, contatos e usuários; hist�
 
 ## Requisitos
 
-- Go 1.26 ou superior para compilar.
+- Go 1.26.11 ou superior para compilar.
 - Acesso a um MySQL com o esquema da aplicação.
 - Docker com Compose apenas para executar a suíte de integração em banco descartável.
 
@@ -168,7 +168,7 @@ funcionando. A verificação `-check` informa essa condição. Não aplique a fi
 
 ### Preparação sem substituir o executável em uso
 
-Na máquina de desenvolvimento, com Go 1.26+ e Node.js 18+ para os testes de interface:
+Na máquina de desenvolvimento, com Go 1.26.11+ e Node.js 18+ para os testes de interface:
 
 ```sh
 make verify
