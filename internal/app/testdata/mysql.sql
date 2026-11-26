@@ -1,4 +1,4 @@
--- Fixture exclusiva dos testes; a aplicação não executa este arquivo.
+-- Fixture exclusiva dos testes. A aplicação não executa este arquivo.
 CREATE TABLE tb_tenants (
 `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 `name` VARCHAR(255) NOT NULL,
