@@ -24,6 +24,7 @@ func testApp(t *testing.T) (*App, sqlmock.Sqlmock) {
 		t.Fatal(e)
 	}
 	t.Cleanup(func() { db.Close() })
+	m.ExpectQuery("SELECT email FROM tb_tenants LIMIT 0").WillReturnRows(sqlmock.NewRows([]string{"email"}))
 	a, e := New(db, Config{SessionHours: 12, Database: DatabaseConfig{Timezone: "America/Sao_Paulo"}})
 	if e != nil {
 		t.Fatal(e)
@@ -152,7 +153,7 @@ func TestLoginCSRFAndRoleChecks(t *testing.T) {
 		t.Fatal("session not rotated")
 	}
 	for _, path := range []string{"/users", "/tenants/new", "/properties/delete/3"} {
-		m.ExpectQuery("SELECT \\* FROM `tb_users` WHERE id = \\?").WithArgs("1").WillReturnRows(sqlmock.NewRows([]string{"id", "username", "role"}).AddRow(1, "maria", "LEITOR"))
+		m.ExpectQuery("SELECT \\* FROM `tb_users` WHERE id = \\?").WithArgs("1").WillReturnRows(sqlmock.NewRows([]string{"id", "username", "role", "password"}).AddRow(1, "maria", "LEITOR", string(hash)))
 		req = httptest.NewRequest("GET", path, nil)
 		req.AddCookie(auth)
 		w = httptest.NewRecorder()
@@ -296,9 +297,7 @@ func TestPropertyWriteAndHistoryAreAtomic(t *testing.T) {
 func TestReceiptCondominiumDecember(t *testing.T) {
 	a, m := testApp(t)
 	m.ExpectQuery("SELECT \\* FROM `tb_landlords`").WithArgs("2").WillReturnRows(sqlmock.NewRows([]string{"id", "name", "cpf_cnpj", "city", "state"}).AddRow(2, "Locador", "12345678901", "Colatina", "ES"))
-	m.ExpectQuery("SELECT \\* FROM `tb_properties`").WithArgs("3").WillReturnRows(sqlmock.NewRows([]string{"id", "tenant_id", "property_type", "rental_value", "payment_day", "observation"}).AddRow(3, 1, "CONDOMINIO", 100, "10", "unidade 101"))
-	m.ExpectQuery("SELECT \\* FROM `tb_tenants`").WithArgs(int64(1)).WillReturnRows(sqlmock.NewRows([]string{"id", "name", "cpf_cnpj"}).AddRow(1, "Maria <script>", "12345678901"))
-	m.ExpectQuery("SELECT contact FROM tb_contacts").WithArgs(int64(1)).WillReturnRows(sqlmock.NewRows([]string{"contact"}).AddRow("555-0100"))
+	m.ExpectQuery("SELECT p.\\*,t.name AS receipt_tenant_name").WithArgs("3").WillReturnRows(sqlmock.NewRows([]string{"id", "tenant_id", "property_type", "rental_value", "payment_day", "observation", "receipt_tenant_name", "receipt_tenant_document", "receipt_contact"}).AddRow(3, 1, "CONDOMINIO", 100, "10", "unidade 101", "Maria <script>", "12345678901", "555-0100"))
 	r := httptest.NewRequest("POST", "/receipts/generate", nil)
 	r.Form = url.Values{"propertyIds": {"3", "3"}, "landlordId": {"2"}, "month": {"Dezembro"}, "year": {"2026"}}
 	w := httptest.NewRecorder()
@@ -337,6 +336,28 @@ func TestBlankOptionalFieldsAndPasswordPreservation(t *testing.T) {
 	}
 	if _, e = validateFields(specs["users"], url.Values{"username": {"maria"}, "role": {"SUPER_ADMIN"}, "password": {"senha"}}, false); e == nil {
 		t.Fatal("invalid enum accepted")
+	}
+}
+
+func TestTenantOptionalEmail(t *testing.T) {
+	for _, editing := range []bool{false, true} {
+		for _, raw := range []string{"", "   ", " maria@example.com "} {
+			v, err := validateFields(specs["tenants"], url.Values{"name": {"Maria"}, "email": {raw}}, editing)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, exists := v["email"]
+			var want any
+			if strings.TrimSpace(raw) != "" {
+				want = "maria@example.com"
+			}
+			if !exists || got != want {
+				t.Fatalf("editing=%v email=%q: got %v (exists=%v), want %v", editing, raw, got, exists, want)
+			}
+			if v["name"] != "Maria" || v["cpf_cnpj"] != nil {
+				t.Fatal("email affected existing tenant fields")
+			}
+		}
 	}
 }
 

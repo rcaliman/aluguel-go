@@ -20,7 +20,7 @@
                   Usuário</span>
 </div>
 <div class="card-custom-body">
-<form method="post" action="/users"><input type="hidden" name="_csrf" value="{{$.CSRF}}">
+<form method="post" action="/users"><input type="hidden" name="_csrf" value="{{$.CSRF}}"><input type="hidden" name="_version" value="{{$.Version}}">
 <input type="hidden" name="id" id="id" value="{{uiText (uiFormValue (uiField (index $model "user") "id"))}}">
 <h5 class="form-section-title">
 <i class="bi bi-person-vcard"></i> Informações de Acesso
@@ -37,7 +37,7 @@
                         Senha
                         {{if (uiDifferent (uiField (index $model "user") "id") nil)}}<span class="text-muted">(deixe em branco para não alterar)</span>{{end}}
 </label>
-<input type="password" class="form-control" id="password" placeholder="Digite a senha" {{if (uiEqual (uiField (index $model "user") "id") nil)}}required{{end}} name="password" autocomplete="new-password">
+<input type="password" class="form-control" id="password" placeholder="Digite a senha" {{if (uiEqual (uiField (index $model "user") "id") nil)}}required{{end}} name="password" minlength="8" autocomplete="new-password">
 </div>
 <div class="col-md-6 mb-3">
 <label for="role" class="form-label">Perfil</label>

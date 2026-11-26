@@ -19,7 +19,7 @@
 <i class="bi bi-pencil-square me-2"></i> Dados do Imóvel
               </div>
 <div class="card-custom-body">
-<form method="post" action="/properties/save"><input type="hidden" name="_csrf" value="{{$.CSRF}}">
+<form method="post" action="/properties/save"><input type="hidden" name="_csrf" value="{{$.CSRF}}"><input type="hidden" name="_version" value="{{$.Version}}">
 <input type="hidden" name="id" id="id" value="{{uiText (uiFormValue (uiField (index $model "property") "id"))}}">
 <h5 class="form-section-title">
 <i class="bi bi-geo-alt"></i> Endereço

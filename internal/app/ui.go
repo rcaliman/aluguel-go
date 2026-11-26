@@ -207,7 +207,7 @@ func uiModel(v view) Row {
 	if len(v.CorrectionData) > 0 {
 		correction = v.CorrectionData
 	}
-	return Row{"property": record, "tenant": tenant, "landlord": landlord, "user": user, "energy": record, "commercialEnergy": record, "energyTitle": record, "energyTitles": record, "properties": v.Rows, "tenants": tenants, "landlords": landlords, "users": v.Rows, "energyReadings": uiRowsLast(v.Rows), "commercialEnergyReadings": uiRowsLast(v.Commercial), "receipts": v.Rows, "propertyLog": v.Logs, "rentalCorrection": correction, "propertyTypes": uiEnums("PropertyTypeEnum"), "propertyUseTypes": uiEnums("PropertyUseTypeEnum"), "contactTypeOptions": uiEnums("ContactTypeEnum"), "maritalStatusOptions": uiEnums("MaritalStatusEnum"), "roles": uiEnums("RoleEnum"), "years": years, "currentYear": v.Year, "currentMonth": v.Month, "currentPage": v.Page, "sortField": v.SortField, "id": v.User["id"], "param": Row{"error": v.Page == "login" && v.Error != "", "logout": false}, "errorMessage": errorMessage, "successMessage": nil}
+	return Row{"property": record, "tenant": tenant, "landlord": landlord, "user": user, "energy": record, "commercialEnergy": record, "energyTitle": record, "energyTitles": record, "properties": v.Rows, "tenants": tenants, "landlords": landlords, "users": v.Rows, "energyReadings": uiEnergyRows(v.Rows, v.PageNumber), "commercialEnergyReadings": uiEnergyRows(v.Commercial, v.PageNumber), "receipts": v.Rows, "propertyLog": v.Logs, "rentalCorrection": correction, "propertyTypes": uiEnums("PropertyTypeEnum"), "propertyUseTypes": uiEnums("PropertyUseTypeEnum"), "contactTypeOptions": uiEnums("ContactTypeEnum"), "maritalStatusOptions": uiEnums("MaritalStatusEnum"), "roles": uiEnums("RoleEnum"), "years": years, "currentYear": v.Year, "currentMonth": v.Month, "currentPage": v.Page, "sortField": v.SortField, "id": v.User["id"], "param": Row{"error": v.Page == "login" && v.Error != "", "logout": false}, "errorMessage": errorMessage, "successMessage": nil}
 }
 
 func uiFunctions(c Config) template.FuncMap {
@@ -304,4 +304,14 @@ func uiNil(v any) bool {
 		return r.IsNil()
 	}
 	return false
+}
+
+func uiEnergyRows(rows []Row, page int) []Row {
+	result := uiRowsLast(rows)
+	if page > 1 {
+		for _, row := range result {
+			row["last"] = false
+		}
+	}
+	return result
 }

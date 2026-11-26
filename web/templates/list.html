@@ -1,6 +1,20 @@
 {{define "list"}}
+<form method="get" class="d-flex gap-2 my-3" role="search">
+<label for="list-search" class="visually-hidden">Buscar registros</label>
+<input id="list-search" class="form-control" type="search" name="q" value="{{.Search}}" placeholder="Buscar por nome, documento ou identificação" maxlength="255">
+{{if .SortField}}<input type="hidden" name="sortField" value="{{.SortField}}">{{end}}
+<button type="submit" class="btn btn-secondary">Buscar</button>
+</form>
 {{if eq .Key "tenants"}}{{template "tenant-list" .}}
 {{else if eq .Key "landlords"}}{{template "landlord-list" .}}
 {{else if eq .Key "properties"}}{{template "property-list" .}}
 {{else if eq .Key "users"}}{{template "user-list" .}}{{end}}
+{{template "pagination" .}}
+{{end}}
+
+{{define "pagination"}}{{if .PageNumber}}<nav aria-label="Paginação" class="d-flex justify-content-between align-items-center my-3">
+<div>{{if .PreviousURL}}<a class="btn btn-secondary" href="{{.PreviousURL}}">Anterior</a>{{end}}</div>
+<span>Página {{.PageNumber}} · até 50 registros por página</span>
+<div>{{if .NextURL}}<a class="btn btn-secondary" href="{{.NextURL}}">Próxima</a>{{end}}</div>
+</nav>{{end}}
 {{end}}

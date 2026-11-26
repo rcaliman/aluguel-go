@@ -30,32 +30,32 @@
 <input class="form-check-input property-checkbox" type="checkbox" id="checkAllTable" data-bs-toggle="tooltip" data-bs-placement="top" title="Clique aqui para marcar todos">
 </th>
 <th width="150">
-<a class="text-decoration-none text-dark" href="/properties?sortField=propertyType">
+<a class="text-decoration-none text-dark" href="/properties?q={{$.Search}}&amp;sortField=propertyType">
                         Tipo
                         {{if (uiEqual (index $model "sortField") "propertyType")}}<span class="ms-1 bi-sort-up"></span>{{end}}
 </a>
 </th>
 <th width="100">
-<a class="text-decoration-none text-dark" href="/properties?sortField=number">
+<a class="text-decoration-none text-dark" href="/properties?q={{$.Search}}&amp;sortField=number">
                         Número
                         {{if (uiEqual (index $model "sortField") "number")}}<span class="ms-1 bi-sort-up"></span>{{end}}
 </a>
 </th>
 <th>
-<a class="text-decoration-none text-dark" href="/properties?sortField=tenant.name">
+<a class="text-decoration-none text-dark" href="/properties?q={{$.Search}}&amp;sortField=tenant.name">
                         Inquilino
                         {{if (uiEqual (index $model "sortField") "tenant.name")}}<span class="ms-1 bi-sort-up"></span>{{end}}
 </a>
 </th>
 <th>Observação</th>
 <th width="120" class="text-center">
-<a class="text-decoration-none text-dark" href="/properties?sortField=paymentDay">
+<a class="text-decoration-none text-dark" href="/properties?q={{$.Search}}&amp;sortField=paymentDay">
                         Dia Pgto.
                         {{if (uiEqual (index $model "sortField") "paymentDay")}}<span class="ms-1 bi-sort-up"></span>{{end}}
 </a>
 </th>
 <th width="120" class="text-end">
-<a class="text-decoration-none text-dark" href="/properties?sortField=value">
+<a class="text-decoration-none text-dark" href="/properties?q={{$.Search}}&amp;sortField=value">
                         Valor R$
                         {{if (uiEqual (index $model "sortField") "value")}}<span class="ms-1 bi-sort-up"></span>{{end}}
 </a>
@@ -127,7 +127,7 @@
 <div class="card-custom">
 <div class="card-custom-header">
 <i class="bi bi-file-earmark-text me-2"></i> Gerar Recibos para
-              Imóveis Selecionados
+              Imóveis Selecionados nesta Página
             </div>
 <div class="card-custom-body">
 <div class="row align-items-end">

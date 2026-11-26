@@ -20,7 +20,7 @@
                   Inquilino</span>
 </div>
 <div class="card-custom-body">
-<form method="post" action="/tenants/save"><input type="hidden" name="_csrf" value="{{$.CSRF}}">
+<form method="post" action="/tenants/save"><input type="hidden" name="_csrf" value="{{$.CSRF}}"><input type="hidden" name="_version" value="{{$.Version}}">
 <input type="hidden" name="id" id="id" value="{{uiText (uiFormValue (uiField (index $model "tenant") "id"))}}">
 <h5 class="form-section-title">
 <i class="bi bi-person-vcard"></i> Identificação
@@ -82,6 +82,13 @@
 <input type="text" class="form-control" id="state" placeholder="Ex: ES" name="state" value="{{uiText (uiFormValue (uiField (index $model "tenant") "state"))}}">
 </div>
 </div>
+{{if not .HideTenantEmail}}<div class="row">
+<div class="col-12 mb-3">
+<label for="email" class="form-label">E-mail (opcional)</label>
+<input type="email" class="form-control" id="email" name="email" maxlength="255" autocomplete="email" placeholder="Ex: nome@exemplo.com" value="{{uiText (uiFormValue (uiField (index $model "tenant") "email"))}}">
+</div>
+</div>
+{{else}}<p class="text-muted">E-mails podem ser cadastrados abaixo como contatos.</p>{{end}}
 <div id="contacts-container">
 {{range $index, $contact := (uiField (index $model "tenant") "contacts")}}{{$iterStat := uiIteration $index}}<div class="row contact-row g-2 mb-2">
 <input type="hidden" name="contacts[{{uiText (uiField $iterStat "index")}}].id" id="contacts[{{uiText (uiField $iterStat "index")}}].id" value="{{uiText (uiField $contact "id")}}">

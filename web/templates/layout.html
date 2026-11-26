@@ -22,6 +22,7 @@
 <body>
   {{template "header" .}}
   {{if and .Error (ne .Page "login")}}<div class="container mt-3"><div class="alert alert-danger" role="alert"><i class="bi bi-exclamation-triangle-fill me-2"></i>{{.Error}}</div></div>{{end}}
+  {{if .Notice}}<div class="container mt-3"><div class="alert alert-success" role="status">{{.Notice}}</div></div>{{end}}
   <main role="main" class="container">
     {{if eq .Page "home"}}{{template "home" .}}
     {{else if eq .Page "login"}}{{template "login" .}}

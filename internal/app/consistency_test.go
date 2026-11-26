@@ -166,7 +166,7 @@ func TestHistoricalSaveRollsBackWithoutWriting(t *testing.T) {
 		t.Run(key, func(t *testing.T) {
 			a, m := testApp(t)
 			m.ExpectBegin()
-			m.ExpectQuery("SELECT \\* FROM `" + specs[key].Table + "` ORDER BY id ASC FOR UPDATE").WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1).AddRow(2))
+			m.ExpectQuery("SELECT \\* FROM `" + specs[key].Table + "` ORDER BY id DESC LIMIT 2 FOR UPDATE").WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(2).AddRow(1))
 			m.ExpectRollback()
 			f := url.Values{"id": {"1"}, "counter1": {"100"}, "counter2": {"100"}, "counter3": {"100"}, "internalCounter": {"100"}, "accountConsumption": {"100"}, "accountValue": {"200"}}
 			if e := a.save(context.Background(), specs[key], f); !errors.Is(e, ErrHistoricalReading) {
@@ -183,10 +183,12 @@ func TestLatestReadingSaveCommitsOnlyOneUpdate(t *testing.T) {
 	a, m := testApp(t)
 	m.ExpectBegin()
 	data := sqlmock.NewRows([]string{"id", "counter_1", "counter_2", "counter_3", "bill_amount"})
-	for _, r := range residentialSequence() {
+	sequence := residentialSequence()
+	for i := len(sequence) - 1; i >= len(sequence)-2; i-- {
+		r := sequence[i]
 		data.AddRow(r["id"], r["counter_1"], r["counter_2"], r["counter_3"], r["bill_amount"])
 	}
-	m.ExpectQuery("SELECT \\* FROM `tb_energy` ORDER BY id ASC FOR UPDATE").WillReturnRows(data)
+	m.ExpectQuery("SELECT \\* FROM `tb_energy` ORDER BY id DESC LIMIT 2 FOR UPDATE").WillReturnRows(data)
 	m.ExpectExec("UPDATE `tb_energy` SET").WithArgs(60.0, 120.0, 120.0, 300.0, 350.0, 400.0, 400.0, nil, nil, "40").WillReturnResult(sqlmock.NewResult(0, 1))
 	m.ExpectCommit()
 	if e := a.save(context.Background(), specs["energies"], url.Values{"id": {"40"}, "counter1": {"350"}, "counter2": {"400"}, "counter3": {"400"}, "billAmount": {"300"}}); e != nil {
@@ -219,9 +221,9 @@ func TestHistoricalPostIsForbiddenWithoutWrites(t *testing.T) {
 			a.sessions["admin"] = session{UserID: "1", CSRF: "token", Expires: time.Now().Add(time.Hour)}
 			m.ExpectQuery("SELECT \\* FROM `tb_users` WHERE id = \\?").WithArgs("1").WillReturnRows(sqlmock.NewRows([]string{"id", "role"}).AddRow(1, "ADMIN"))
 			m.ExpectBegin()
-			m.ExpectQuery("SELECT \\* FROM `" + specs[key].Table + "` ORDER BY id ASC FOR UPDATE").WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1).AddRow(2))
+			m.ExpectQuery("SELECT \\* FROM `" + specs[key].Table + "` ORDER BY id DESC LIMIT 2 FOR UPDATE").WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(2).AddRow(1))
 			m.ExpectRollback()
-			f := url.Values{"_csrf": {"token"}, "id": {"1"}, "counter1": {"100"}, "counter2": {"100"}, "counter3": {"100"}, "internalCounter": {"100"}, "accountConsumption": {"100"}, "accountValue": {"200"}}
+			f := url.Values{"_csrf": {"token"}, "_version": {"stale"}, "id": {"1"}, "counter1": {"100"}, "counter2": {"100"}, "counter3": {"100"}, "internalCounter": {"100"}, "accountConsumption": {"100"}, "accountValue": {"200"}}
 			path := "/energies/save"
 			if key == "commercial" {
 				path = "/energies/save-commercial"

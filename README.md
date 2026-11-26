@@ -151,3 +151,148 @@ A suíte recusa bancos que já contenham tabelas e remove as tabelas que criou a
 
 `config.json`, configurações privadas, logs, diretórios de ferramentas e executáveis gerados ficam fora do versionamento pelo `.gitignore`. Publique o código-fonte e `config.example.json`; mantenha as credenciais reais apenas no ambiente de execução.
 # aluguel-go
+
+## Atualização de produção com as correções de segurança
+
+Esta atualização não executa migrações e não exige novas tabelas ou colunas.
+Mantém os tipos numéricos, os documentos e os hashes de senha existentes. O
+`config.json` atual continua válido. A aplicação verifica que suas tabelas usam
+InnoDB, necessário para as transações e os bloqueios. Se encontrar outro motor,
+recusa iniciar com uma mensagem explicativa, sem converter nada. Nesse caso,
+conserve o binário anterior e planeje a conversão em uma cópia do banco primeiro.
+
+A coluna `tb_tenants.email`, incluída no formulário, é opcional: quando ausente,
+o formulário usa os contatos para registrar e-mails e os cadastros continuam
+funcionando. A verificação `-check` informa essa condição. Não aplique a fixture
+`internal/app/testdata/mysql.sql` em produção.
+
+### Preparação sem substituir o executável em uso
+
+Na máquina de desenvolvimento, com Go 1.26+ e Node.js 18+ para os testes de interface:
+
+```sh
+make verify
+make integration
+make candidate
+```
+
+`make integration` precisa de Docker com Compose e usa somente um MySQL
+8.4 descartável. Os cenários adicionais incluem inserções concorrentes na
+primeira leitura de energia, conflito entre edições, tentativas simultâneas de
+remover a última permissão de administrador e funcionamento sem a coluna de
+e-mail. A CI em `.github/workflows/test.yml` também executa essa integração.
+O banco real não é acessado por esses comandos.
+
+Se o servidor tiver arquitetura diferente, use `make build-rpi` e selecione o
+binário correspondente. Compile e verifique antes de parar o serviço atual.
+
+### Procedimento de implantação
+
+1. Faça um backup restaurável do banco, guarde uma cópia do executável atual e
+   preserve o `config.json`. Use sua ferramenta habitual de backup. Teste a
+   restauração em um banco separado antes de depender desse backup.
+2. Copie o novo executável ao servidor com um nome separado, por exemplo
+   `aluguel-candidate`, no mesmo diretório do executável atual. Não sobrescreva
+   um arquivo em execução. Ajuste a permissão com `chmod +x aluguel-candidate`.
+3. Nesse diretório, execute a verificação somente de leitura:
+
+   ```sh
+   ./aluguel-candidate -config /caminho/real/config.json -check
+   ```
+
+   Substitua o caminho pelo arquivo já usado em produção. Só prossiga se a
+   verificação concluir com sucesso. Nenhum DDL é executado por esse comando.
+4. Em uma janela curta de manutenção, encerre a instância antiga com SIGTERM
+   ou pelo gerenciador de serviço já utilizado. Aguarde seu encerramento, então
+   renomeie o executável antigo para `aluguel-previous` e o candidato para o
+   nome utilizado pelo serviço. Inicie pelo mesmo gerenciador e com os mesmos
+   argumentos. Não mantenha versões diferentes escrevendo simultaneamente.
+5. Faça novo login e recarregue o navegador com `Ctrl+Shift+R`. As sessões são
+   em memória e o reinício exige autenticação. Reabra os formulários de edição
+   que estavam abertos antes da atualização.
+6. Confira login de cada perfil utilizado, listagens e buscas, abertura de um
+   cadastro, geração/impressão de recibo e contrato e consulta de energia.
+   Valide a gravação primeiro em homologação com cópia do banco. Observe os
+   logs do serviço para erros de conexão, esquema ou transação.
+
+Os nomes de serviço e diretórios dependem da instalação; não há um serviço
+systemd ou implantação Docker de produção definido neste repositório.
+
+### Reversão
+
+Pare a instância nova, devolva `aluguel-previous` ao nome original e inicie pelo
+mesmo gerenciador. Esta versão não altera o esquema nem converte dados, portanto
+não precisa de uma migração inversa. Gravações válidas feitas depois da atualização
+continuam no banco e senhas novas continuam usando BCrypt compatível. Restaurar
+um backup do banco é uma operação separada que descartaria gravações posteriores;
+não é necessário fazê-lo para apenas reverter o executável.
+
+### Mudanças percebidas pelos usuários
+
+- Trocar a senha exige a senha atual. Novas senhas precisam de pelo menos oito
+  caracteres e no máximo 72 bytes; senhas antigas continuam autenticando.
+- Alterações administrativas em usuários encerram suas sessões. Senhas
+  redefinidas invalidam as sessões anteriores, inclusive em outras instâncias
+  desta versão ao receberem a próxima requisição.
+- O login permite até dez tentativas por conta e sessenta por origem em um
+  minuto, com até quatro verificações simultâneas por processo. Excesso retorna
+  HTTP 429 com `Retry-After`. Atrás de um proxy, o limite por origem é compartilhado:
+  cabeçalhos encaminhados não são aceitos como endereço confiável.
+- Cadastros e histórico de energia mostram até cinquenta registros por página.
+  A seleção de imóveis para recibos pertence à página atual e não é mantida ao
+  trocar de página. Uma emissão aceita no máximo quinhentos IDs distintos ou
+  repetidos no pedido. A visão recente de energia continua mostrando três
+  leituras residenciais e duas comerciais.
+- Formulários antigos ou modificados por outra pessoa precisam ser reabertos;
+  conflitos são informados sem sobrescrever silenciosamente os dados. A proteção
+  compara o registro completo e seus contatos, sem depender da precisão de
+  `updated_at`. Todos os escritores devem usar esta versão para respeitá-la.
+- Novas gravações validam vencimento entre 1 e 31, aluguel não negativo, tamanho
+  dos textos, formato de e-mail e CPF/CNPJ com 11 ou 14 dígitos. A validação de
+  documentos não verifica dígitos verificadores. Documentos formatados são
+  preservados, mas duplicatas equivalentes são recusadas. Dados antigos não
+  são corrigidos automaticamente: um registro inválido pode exigir correção ao
+  ser editado. Dias como 31 continuam sendo rejeitados ao gerar um contrato em
+  um mês sem esse dia, em vez de mover a data silenciosamente.
+- O IPCA usa cache por período por seis horas e cache de falhas por trinta
+  segundos. A primeira consulta pode aguardar até três segundos; falhas, HTTP
+  404 e respostas sem índices são mostradas como indisponíveis, nunca como 0%.
+- A confirmação de exclusão informa o registro e as consequências de liberar
+  imóveis ou apagar histórico.
+
+### Campo de e-mail separado: habilitação opcional
+
+Não é necessário executar SQL para implantar esta atualização. Caso queira o
+campo de e-mail separado e ele ainda não exista, faça backup, teste a operação
+em homologação e confirme a versão do MySQL. No cliente SQL conectado ao banco
+correto, consulte primeiro:
+
+```sql
+SELECT DATABASE(), VERSION();
+SHOW COLUMNS FROM tb_tenants LIKE 'email';
+```
+
+Somente se a segunda consulta não retornar nenhuma linha, execute:
+
+```sql
+ALTER TABLE tb_tenants ADD COLUMN email VARCHAR(255) NULL DEFAULT NULL;
+```
+
+A adição é nullable e não reescreve valores da aplicação nem invalida o binário
+anterior. O tempo de execução e possíveis bloqueios do DDL dependem da versão
+e do tamanho da tabela: não presuma que seja uma operação instantânea. Reinicie
+a aplicação depois para reconhecer a coluna. Não remova a coluna ao reverter o
+executável, pois isso apagaria os e-mails já registrados.
+
+### Limites desta atualização
+
+Não há conversão de `DOUBLE` para `DECIMAL` nem alteração da política de
+arredondamento dos rateios. Essa mudança precisa de comparação dos resultados
+com dados reais, reconciliação dos valores e migração própria. Não há criação
+automática de índices: avalie os índices existentes e `EXPLAIN` antes de alterar
+o banco. A verificação `-check` valida colunas e motor, não certifica todos os
+tipos, índices ou a qualidade dos dados existentes.
+
+Os testes JavaScript verificam as confirmações de exclusão com DOM simulado;
+os testes Go verificam renderização e fluxos HTTP. Eles não substituem a
+conferência em navegador de máscaras, impressão, dispositivos móveis e teclado.

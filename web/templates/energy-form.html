@@ -18,7 +18,7 @@
               Leitura</span>
 </div>
 <div class="card-custom-body">
-<form method="post" action="/energies/save"><input type="hidden" name="_csrf" value="{{$.CSRF}}">{{if (uiDifferent (uiField (index $model "energy") "id") nil)}}<p class="alert alert-info">Somente a última leitura de cada tabela pode ser alterada. As leituras anteriores ficam protegidas.</p>{{end}}
+<form method="post" action="/energies/save"><input type="hidden" name="_csrf" value="{{$.CSRF}}"><input type="hidden" name="_version" value="{{$.Version}}">{{if (uiDifferent (uiField (index $model "energy") "id") nil)}}<p class="alert alert-info">Somente a última leitura de cada tabela pode ser alterada. As leituras anteriores ficam protegidas.</p>{{end}}
 <input type="hidden" name="id" id="id" value="{{uiText (uiFormValue (uiField (index $model "energy") "id"))}}">
 <div class="row">
 <div class="col-md-6 mb-3">

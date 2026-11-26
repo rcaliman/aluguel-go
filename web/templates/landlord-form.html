@@ -20,7 +20,7 @@
                   Locador</span>
 </div>
 <div class="card-custom-body">
-<form method="post" action="/landlords/save"><input type="hidden" name="_csrf" value="{{$.CSRF}}">
+<form method="post" action="/landlords/save"><input type="hidden" name="_csrf" value="{{$.CSRF}}"><input type="hidden" name="_version" value="{{$.Version}}">
 <input type="hidden" name="id" id="id" value="{{uiText (uiFormValue (uiField (index $model "landlord") "id"))}}">
 <h5 class="form-section-title">
 <i class="bi bi-person-vcard"></i> Identificação

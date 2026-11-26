@@ -6,6 +6,14 @@
     "Timestamps": true,
     "Fields": [
       {
+        "Name": "email",
+        "Column": "email",
+        "Label": "E-mail",
+        "Kind": "text",
+        "Required": false,
+        "Derived": false
+      },
+      {
         "Name": "name",
         "Column": "name",
         "Label": "Nome",

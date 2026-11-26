@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 //go:embed schema.json
@@ -213,8 +214,8 @@ func validateFields(s Spec, f url.Values, editing bool) (Row, error) {
 				}
 				x = n
 			case "password":
-				if len(raw) > 72 {
-					return nil, fmt.Errorf("senha deve ter até 72 bytes")
+				if utf8.RuneCountInString(raw) < 8 || len(raw) > 72 {
+					return nil, fmt.Errorf("nova senha deve ter pelo menos 8 caracteres e até 72 bytes")
 				}
 				h, e := bcrypt.GenerateFromPassword([]byte(raw), 10)
 				if e != nil {
@@ -237,9 +238,17 @@ func validateFields(s Spec, f url.Values, editing bool) (Row, error) {
 		}
 		v[c.Column] = x
 	}
+	if s.Key == "tenants" || s.Key == "landlords" {
+		if err := validateContacts(f); err != nil {
+			return nil, err
+		}
+	}
+	if err := validateDomain(s, v); err != nil {
+		return nil, err
+	}
 	return v, nil
 }
-func (a *App) save(ctx context.Context, s Spec, f url.Values) (err error) {
+func (a *App) saveOnce(ctx context.Context, s Spec, f url.Values) (err error) {
 	if s.Key == "titles" {
 		return a.saveEnergyTitles(ctx, f)
 	}
@@ -256,19 +265,43 @@ func (a *App) save(ctx context.Context, s Spec, f url.Values) (err error) {
 	if e != nil {
 		return e
 	}
-	tx, e := a.db.BeginTx(ctx, nil)
+	if s.Key == "tenants" && !a.tenantEmailAvailable {
+		if v["email"] != nil {
+			return errors.New("O campo de e-mail ainda não está habilitado neste banco. Cadastre o e-mail como contato ou habilite a coluna opcional conforme o README.")
+		}
+		delete(v, "email")
+	}
+	var opts *sql.TxOptions
+	if s.Key == "energies" || s.Key == "commercial" || v["cpf_cnpj"] != nil {
+		opts = &sql.TxOptions{Isolation: sql.LevelSerializable}
+	}
+	tx, e := a.db.BeginTx(ctx, opts)
 	if e != nil {
 		return e
 	}
 	defer tx.Rollback()
 	if s.Key == "energies" || s.Key == "commercial" {
-		if e = saveEnergy(ctx, tx, s, id, v); e != nil {
+		if e = saveEnergy(ctx, tx, s, id, v, f.Get("_version")); e != nil {
 			return e
 		}
 		return tx.Commit()
 	}
+	if s.Key == "users" && editing {
+		if e = protectAdmin(ctx, tx, id, str(v["role"])); e != nil {
+			return e
+		}
+	}
 	if editing {
-		if _, e = one(ctx, tx, s.Table, id); e != nil {
+		current, err := lockedRecord(ctx, tx, s.Table, id)
+		if err != nil {
+			return err
+		}
+		if err = checkVersion(ctx, tx, s, current, f.Get("_version")); err != nil {
+			return err
+		}
+	}
+	if s.Key == "tenants" || s.Key == "landlords" {
+		if e = uniqueDocument(ctx, tx, s, id, v); e != nil {
 			return e
 		}
 	}
@@ -330,7 +363,13 @@ func (a *App) save(ctx context.Context, s Spec, f url.Values) (err error) {
 		}
 	}
 
-	return tx.Commit()
+	if e = tx.Commit(); e != nil {
+		return e
+	}
+	if s.Key == "users" && editing {
+		a.revokeSessions(id)
+	}
+	return nil
 }
 func calculateEnergy(key string, v, p Row) error {
 	if key == "energies" {
@@ -385,7 +424,12 @@ func (a *App) delete(ctx context.Context, s Spec, id string, u Row) error {
 		return e
 	}
 	defer tx.Rollback()
-	r, e := one(ctx, tx, s.Table, id)
+	if s.Key == "users" {
+		if e = protectAdmin(ctx, tx, id, ""); e != nil {
+			return e
+		}
+	}
+	r, e := lockedRecord(ctx, tx, s.Table, id)
 	if e != nil {
 		return e
 	}
@@ -421,7 +465,13 @@ func (a *App) delete(ctx context.Context, s Spec, id string, u Row) error {
 	if _, e = tx.ExecContext(ctx, "DELETE FROM "+ident(s.Table)+" WHERE id=?", id); e != nil {
 		return e
 	}
-	return tx.Commit()
+	if e = tx.Commit(); e != nil {
+		return e
+	}
+	if s.Key == "users" {
+		a.revokeSessions(id)
+	}
+	return nil
 }
 
 func (a *App) now() time.Time {

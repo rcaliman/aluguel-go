@@ -44,11 +44,17 @@ func (a *App) saveEnergyTitles(ctx context.Context, form url.Values) error {
 	if e != nil {
 		return e
 	}
+	if want := form.Get("_version"); want != "" && recordVersion(current, nil) != want {
+		return ErrConflict
+	}
 	values := Row{}
 	for _, field := range specs["titles"].Fields {
 		values[field.Column] = current[field.Column]
 		if form.Has(field.Name) {
 			value := strings.TrimSpace(form.Get(field.Name))
+			if len([]rune(value)) > 255 {
+				return fmt.Errorf("%s deve ter até 255 caracteres", field.Label)
+			}
 			if value == "" {
 				values[field.Column] = nil
 			} else {

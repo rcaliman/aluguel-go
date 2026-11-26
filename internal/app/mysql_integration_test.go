@@ -147,6 +147,96 @@ func TestMySQLCompatibility(t *testing.T) {
 	}
 	assertAmounts(t, changed, 50, 350)
 
+	t.Run("ConcurrentFirstEnergyReadings", func(t *testing.T) {
+		// This is the disposable fixture, never the configured application DB.
+		if _, err := db.Exec("TRUNCATE TABLE tb_energy"); err != nil {
+			t.Fatal(err)
+		}
+		errs := make(chan error, 2)
+		start := make(chan struct{})
+		for i := 0; i < 2; i++ {
+			go func() {
+				<-start
+				errs <- a.save(ctx, specs["energies"], url.Values{"counter1": {"100"}, "counter2": {"100"}, "counter3": {"100"}, "billAmount": {"300"}})
+			}()
+		}
+		close(start)
+		for i := 0; i < 2; i++ {
+			if err := <-errs; err != nil {
+				t.Fatal(err)
+			}
+		}
+		var n int
+		if err := db.QueryRow("SELECT COUNT(*) FROM tb_energy").Scan(&n); err != nil || n != 2 {
+			t.Fatalf("rows=%d err=%v", n, err)
+		}
+	})
+	t.Run("ConcurrentPropertyEdits", func(t *testing.T) {
+		before, err := one(ctx, db, "tb_properties", 1)
+		if err != nil {
+			t.Fatal(err)
+		}
+		version := recordVersion(before, nil)
+		errs := make(chan error, 2)
+		start := make(chan struct{})
+		for _, value := range []string{"1500", "1600"} {
+			go func(value string) {
+				<-start
+				errs <- a.save(ctx, specs["properties"], url.Values{"id": {"1"}, "_version": {version}, "propertyType": {"APARTAMENTO"}, "tenant": {"1"}, "value": {value}, "paymentDay": {"10"}})
+			}(value)
+		}
+		close(start)
+		ok, conflict := 0, 0
+		for i := 0; i < 2; i++ {
+			err := <-errs
+			if err == nil {
+				ok++
+			} else if errors.Is(err, ErrConflict) {
+				conflict++
+			} else {
+				t.Fatal(err)
+			}
+		}
+		if ok != 1 || conflict != 1 {
+			t.Fatalf("success=%d conflict=%d", ok, conflict)
+		}
+	})
+
+	t.Run("ConcurrentLastAdminDemotions", func(t *testing.T) {
+		save("users", url.Values{"username": {"second-admin"}, "password": {"second password"}, "role": {"ADMIN"}})
+		rows, err := query(ctx, db, "SELECT id,username FROM tb_users ORDER BY id")
+		if err != nil {
+			t.Fatal(err)
+		}
+		errs := make(chan error, 2)
+		start := make(chan struct{})
+		for _, row := range rows {
+			go func(row Row) {
+				<-start
+				errs <- a.save(ctx, specs["users"], url.Values{"id": {str(row["id"])}, "username": {str(row["username"])}, "role": {"LEITOR"}})
+			}(row)
+		}
+		close(start)
+		ok, rejected := 0, 0
+		for range rows {
+			err := <-errs
+			if err == nil {
+				ok++
+			} else if errors.Is(err, ErrLastAdmin) {
+				rejected++
+			} else {
+				t.Fatal(err)
+			}
+		}
+		if ok != 1 || rejected != 1 {
+			t.Fatalf("success=%d rejected=%d", ok, rejected)
+		}
+		var n int
+		if err := db.QueryRow("SELECT COUNT(*) FROM tb_users WHERE role='ADMIN'").Scan(&n); err != nil || n != 1 {
+			t.Fatalf("admins=%d err=%v", n, err)
+		}
+	})
+
 	save("titles", url.Values{"titleAmount1": {"Kit 1"}, "titleAmount2": {"Kit 2"}, "titleAmount3": {"Kit 3"}, "titleAmount4": {"Loja 1"}, "titleAmount5": {"Loja 2"}})
 	save("titles", url.Values{"titleAmount2": {"Kit alterada"}})
 	titles, err := energyTitles(ctx, db, false)
@@ -177,4 +267,20 @@ func TestMySQLCompatibility(t *testing.T) {
 	if e = db.QueryRow("SELECT COUNT(*) FROM tb_properties_logs").Scan(&count); e != nil || count != 0 {
 		t.Fatalf("history delete %d %v", count, e)
 	}
+	t.Run("LegacyDatabaseWithoutEmail", func(t *testing.T) {
+		if _, err := db.Exec("ALTER TABLE tb_tenants DROP COLUMN email"); err != nil {
+			t.Fatal(err)
+		}
+		if err := ValidateSchema(ctx, db); err != nil {
+			t.Fatal(err)
+		}
+		legacy, err := New(db, a.cfg)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := legacy.save(ctx, specs["tenants"], url.Values{"name": {"Legacy tenant"}, "contacts[0].type": {"EMAIL"}, "contacts[0].contact": {"legacy@example.com"}}); err != nil {
+			t.Fatal(err)
+		}
+	})
+
 }

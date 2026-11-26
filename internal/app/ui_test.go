@@ -108,11 +108,12 @@ func TestUIPagesAndBindings(t *testing.T) {
 		t.Fatal("current tenant selection lost")
 	}
 	v = uiFixtureViews()["tenants-form"]
+	v.Record["email"] = "maria@example.com"
 	out.Reset()
 	if e := a.tpl.ExecuteTemplate(&out, "layout", v); e != nil {
 		t.Fatal(e)
 	}
-	for _, binding := range []string{`name="contacts[0].contact"`, `value="(27) 99999-1234"`, `value="CASADO" selected`, `value="1980-02-29"`} {
+	for _, binding := range []string{`name="contacts[0].contact"`, `value="(27) 99999-1234"`, `value="CASADO" selected`, `value="1980-02-29"`, `name="email"`, `value="maria@example.com"`} {
 		if !strings.Contains(out.String(), binding) {
 			t.Fatalf("form binding missing: %s", binding)
 		}

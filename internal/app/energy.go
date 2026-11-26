@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
+	"strconv"
 )
 
 type energyChange struct {
@@ -80,11 +82,28 @@ func energyPlan(key, id string, values Row, rows []Row) ([]energyChange, error) 
 	return changes, nil
 }
 
-func saveEnergy(ctx context.Context, tx *sql.Tx, s Spec, id string, values Row) error {
-	// Lock the sequence through validation and saving of the latest reading.
-	rows, e := query(ctx, tx, "SELECT * FROM "+ident(s.Table)+" ORDER BY id ASC FOR UPDATE")
+func saveEnergy(ctx context.Context, tx *sql.Tx, s Spec, id string, values Row, version string) error {
+	// Serializable isolation plus a locking read of the upper ID range protects
+	// the latest row and its insertion gap, including an initially empty table.
+	// Concurrent first inserts may deadlock; MySQL aborts one without partial writes.
+	rows, e := query(ctx, tx, "SELECT * FROM "+ident(s.Table)+" ORDER BY id DESC LIMIT 2 FOR UPDATE")
 	if e != nil {
 		return e
+	}
+	slices.Reverse(rows)
+	if id != "" && len(rows) > 0 {
+		last := rows[len(rows)-1]
+		if str(last["id"]) != id {
+			requested, _ := strconv.ParseInt(id, 10, 64)
+			latest, _ := strconv.ParseInt(str(last["id"]), 10, 64)
+			if requested < latest {
+				return ErrHistoricalReading
+			}
+			return sql.ErrNoRows
+		}
+		if version != "" && recordVersion(last, nil) != version {
+			return ErrConflict
+		}
 	}
 	changes, e := energyPlan(s.Key, id, values, rows)
 	if e != nil {

@@ -1,12 +1,9 @@
 package app
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 	"math"
 	"net/http"
-	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -151,7 +148,7 @@ func (a *App) receipts(w http.ResponseWriter, r *http.Request, v view) {
 	ids := r.Form["propertyIds"]
 	m := monthNumber(r.Form.Get("month"))
 	year, e := strconv.Atoi(r.Form.Get("year"))
-	if len(ids) == 0 || m == 0 || e != nil || year < 1900 || year > 9998 {
+	if len(ids) == 0 || len(ids) > 500 || m == 0 || e != nil || year < 1900 || year > 9998 {
 		http.Error(w, "Selecione imóveis, mês, ano e locador válidos.", 400)
 		return
 	}
@@ -161,37 +158,45 @@ func (a *App) receipts(w http.ResponseWriter, r *http.Request, v view) {
 		a.fail(w, r, e)
 		return
 	}
-	v.Page = "receipts"
-	v.Title = "Recibos"
+	// Fetch the selected properties, tenants and first contact in one round trip.
+	uniqueIDs := []string{}
 	seen := map[string]bool{}
-	for _, id := range ids {
-		if seen[id] {
-			continue
-		}
-		seen[id] = true
-		p, e := one(ctx, a.db, "tb_properties", id)
-		if e != nil {
-			a.fail(w, r, e)
+	for _, raw := range ids {
+		n, err := ParseID(raw)
+		if err != nil {
+			http.Error(w, "Imóvel inválido.", 400)
 			return
 		}
-		if p["tenant_id"] == nil {
+		id := str(n)
+		if !seen[id] {
+			uniqueIDs = append(uniqueIDs, id)
+			seen[id] = true
+		}
+	}
+	marks := make([]string, len(uniqueIDs))
+	args := make([]any, len(uniqueIDs))
+	for i, id := range uniqueIDs {
+		marks[i] = "?"
+		args[i] = id
+	}
+	properties, e := query(ctx, a.db, "SELECT p.*,t.name AS receipt_tenant_name,t.cpf_cnpj AS receipt_tenant_document,(SELECT c.contact FROM tb_contacts c WHERE c.tenant_id=t.id ORDER BY c.id LIMIT 1) AS receipt_contact FROM tb_properties p LEFT JOIN tb_tenants t ON t.id=p.tenant_id WHERE p.id IN ("+strings.Join(marks, ",")+") ORDER BY p.id", args...)
+	if e != nil {
+		a.fail(w, r, e)
+		return
+	}
+	if len(properties) != len(uniqueIDs) {
+		http.Error(w, "Um dos imóveis selecionados não existe mais. Atualize a lista.", 404)
+		return
+	}
+	v.Page = "receipts"
+	v.Title = "Recibos"
+	for _, p := range properties {
+		if p["tenant_id"] == nil || p["receipt_tenant_name"] == nil {
 			http.Error(w, "Não é possível emitir recibo de imóvel vago.", 400)
 			return
 		}
-		t, e := one(ctx, a.db, "tb_tenants", p["tenant_id"])
-		if e != nil {
-			a.fail(w, r, e)
-			return
-		}
-		contacts, e := query(ctx, a.db, "SELECT contact FROM tb_contacts WHERE tenant_id=? ORDER BY id LIMIT 1", t["id"])
-		if e != nil {
-			a.fail(w, r, e)
-			return
-		}
-		contact := ""
-		if len(contacts) > 0 {
-			contact = str(contacts[0]["contact"])
-		}
+		t := Row{"name": p["receipt_tenant_name"], "cpf_cnpj": p["receipt_tenant_document"]}
+		contact := str(p["receipt_contact"])
 		receiptMonth, receiptYear := m, year
 		if p["property_type"] == "CONDOMINIO" {
 			receiptMonth++
@@ -334,48 +339,6 @@ func (a *App) info(w http.ResponseWriter, r *http.Request, v view, id string) {
 	}
 
 	a.render(w, v)
-}
-func (a *App) ipca(ctx context.Context, start, end time.Time) (float64, error) {
-	loc := aLocation(a.cfg)
-	start = start.In(loc)
-	end = end.In(loc)
-	start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, loc)
-	end = time.Date(end.Year(), end.Month(), end.Day(), 0, 0, 0, 0, loc)
-	if !start.Before(end) {
-		return 0, nil
-	}
-	q := url.Values{"formato": {"json"}, "dataInicial": {start.Format("02/01/2006")}, "dataFinal": {end.Format("02/01/2006")}}
-	endpoint := "https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados?" + q.Encode()
-	req, e := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
-	if e != nil {
-		return 0, e
-	}
-	resp, e := (&http.Client{Timeout: 10 * time.Second}).Do(req)
-	if e != nil {
-		return 0, e
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode == 404 {
-		return 0, nil
-	}
-	if resp.StatusCode != 200 {
-		return 0, fmt.Errorf("Bacen HTTP %d", resp.StatusCode)
-	}
-	var data []struct {
-		Valor string `json:"valor"`
-	}
-	if e = json.NewDecoder(resp.Body).Decode(&data); e != nil {
-		return 0, e
-	}
-	factor := 1.0
-	for _, r := range data {
-		n, e := strconv.ParseFloat(strings.ReplaceAll(r.Valor, ",", "."), 64)
-		if e != nil {
-			return 0, e
-		}
-		factor *= 1 + n/100
-	}
-	return (factor - 1) * 100, nil
 }
 
 // Derive the reference from successive snapshots, including existing records.
